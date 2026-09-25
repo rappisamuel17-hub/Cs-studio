@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SC Studio App</title>
+    
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --pink-primary: #ff1493;
+            --pink-vibrant: #ff007f;
+            --pink-dark: #b80058;
+            --pink-light: #ffe4e1;
+            --pink-gradient: linear-gradient(135deg, #ff3399 0%, #ff0066 50%, #d80056 100%);
+            --gold-gradient: linear-gradient(135deg, #fff176 0%, #ffd700 50%, #b8860b 100%);
+            --gold-color: #ffd700;
+            --purple-accent: #8a2be2;
+            --vibrant-gradient: linear-gradient(135deg, #ff007f 0%, #7b2cbf 100%);
+            --dark-bg: #121212;
+            --dark-text: #111111;
+            --light-bg: #fff8fa;
+            --card-shadow: 0 10px 25px rgba(255, 0, 127, 0.15);
+            --gold-shadow: 0 8px 22px rgba(255, 215, 0, 0.4);
+            --safe-area-top: env(safe-area-inset-top, 0px);
+            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            overflow-x: hidden;
+            padding-top: var(--safe-area-top);
+            padding-bottom: var(--safe-area-bottom);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        input, textarea, select {
+            user-select: auto;
+        }
+
+        /* BANNER TOP ANIMADO */
+        .top-bar {
+            background: linear-gradient(90deg, #ff007f, #8a2be2, #ffd700, #ff007f);
+            background-size: 300% 300%;
+            animation: gradientMove 6s ease infinite;
+            color: white;
+            text-align: center;
+            padding: 9px 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 10px rgba(255, 0, 127, 0.3);
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .top-bar button {
+            background: white;
+            color: var(--pink-dark);
+            border: none;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 0.75rem;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        /* HEADER APP */
+        header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 2px solid rgba(255, 0, 127, 0.2);
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.08);
+        }
+
+        nav {
+            max-width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+        }
+
+        .logo-box {
+            background: var(--vibrant-gradient);
+            padding: 6px 18px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(255, 0, 127, 0.3);
+        }
+
+        .logo-text {
+            font-family: 'Cinzel', serif;
+            font-size: 1.7rem;
+            font-weight: 900;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        .logo-sub {
+            font-family: 'Cinzel', serif;
+            font-size: 0.58rem;
+            color: white;
+            letter-spacing: 3px;
+            border-top: 1px solid rgba(255, 215, 0, 0.8);
+            padding-top: 2px;
+            font-weight: 700;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: var(--pink-dark);
+            cursor: pointer;
+            position: relative;
+            padding: 5px;
+            touch-action: manipulation;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -2px;
+            right: -4px;
+            background: var(--vibrant-gradient);
+            color: white;
+            font-size: 0.65rem;
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* HERO SECTION */
+        .hero {
+            background: linear-gradient(rgba(20, 0, 15, 0.55), rgba(20, 0, 15, 0.75)), 
+                        url('https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
+            padding: 65px 20px;
+            text-align: center;
+            color: white;
+            border-bottom: 4px solid var(--pink-vibrant);
+        }
+
+        .hero h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.3rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+            line-height: 1.2;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .hero h1 span {
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 0.98rem;
+            margin-bottom: 25px;
+            font-weight: 400;
+            text-shadow: 0 1px 5px rgba(0,0,0,0.5);
+        }
+
+        .btn-gold {
+            background: var(--gold-gradient);
+            color: #111;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: var(--gold-shadow);
+            touch-action: manipulation;
+        }
+
+        /* SECCIONES Y TITULOS */
+        .container {
+            padding: 0 15px;
+        }
+
+        .section-title {
+            text-align: center;
+            margin: 40px 0 25px;
+        }
+
+        .section-title h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.9rem;
+            color: var(--pink-dark);
+            position: relative;
+            display: inline-block;
+            font-weight: 900;
+        }
+
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 4px;
+            background: var(--vibrant-gradient);
+            border-radius: 3px;
+        }
+
+        .section-title p {
+            color: #666;
+            margin-top: 12px;
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+
+        /* SERVICIOS DE SALON */
+        .category-subtitle {
+            margin: 28px 0 14px;
+            font-size: 1.1rem;
+            color: white;
+            background: var(--vibrant-gradient);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(255, 0, 127, 0.2);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 14px;
+            padding: 16px 12px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            border: 2px solid rgba(255, 0, 127, 0.12);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s ease;
+        }
+
+        .service-card:active {
+            transform: scale(0.98);
+        }
+
+        .service-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #ffe4e1 0%, #ffd1dc 100%);
+            color: var(--pink-vibrant);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin: 0 auto 10px;
+            border: 2px solid rgba(255, 0, 127, 0.25);
+            box-shadow: 0 4px 10px rgba(255, 0, 127, 0.15);
+        }
+
+        .service-card h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+            color: #111;
+            font-weight: 700;
+        }
+
+        .service-card p {
+            font-size: 0.76rem;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .price {
+            font-weight: 800;
+            color: var(--pink-dark);
+            font-size: 1.15rem;
+            margin-bottom: 8px;
+        }
+
+        .btn-book-service {
+            width: 100%;
+            background: var(--pink-gradient);
+            color: white;
+            border: none;
+            padding: 10px 5px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(255, 0, 127, 0.3);
+            touch-action: manipulation;
+        }
+
+        /* TIENDA DE PRODUCTOS */
+        .store-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .store-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            background: white;
+            border: 2px solid rgba(255, 0, 127, 0.2);
+            color: var(--pink-dark);
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            touch-action: manipulation;
+        }
+
+        .tab-btn.active {
+            background: var(--vibrant-gradient);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(255, 0, 127, 0.3);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 0, 127, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-img-box {
+            position: relative;
+            width: 100%;
+            height: 140px;
+            background: #fafafa;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .badge-best {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: var(--gold-gradient);
+            color: #000;
+            font-size: 0.58rem;
+            font-weight: 800;
+            padding: 3px 7px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .product-info {
+            padding: 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .product-category {
+            font-size: 0.65rem;
+            color: var(--pink-vibrant);
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+
+        .product-title {
+            font-size: 0.82rem;
+            margin: 3px 0 6px;
+            font-weight: 700;
+            line-height: 1.2;
+            min-height: 2.4em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-price {
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--pink-dark);
+            margin-bottom: 8px;
+        }
+
+        .btn-add-cart {
+            width: 100%;
+            background: var(--dark-text);
+            color: white;
+            border: none;
+            padding: 9px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            touch-action: manipulation;
+        }
+
+        /* MODALES */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            max-height: 88vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            border: 2px solid var(--pink-vibrant);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--pink-dark);
+            padding: 5px;
+            font-weight: bold;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .modal-header h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem;
+            color: var(--pink-dark);
+            font-weight: 800;
+        }
+
+        .modal-header p {
+            font-size: 0.82rem;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 11px;
+            border: 2px solid #ffe0ec;
+            border-radius: 10px;
+            outline: none;
+            font-size: 0.88rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--pink-vibrant);
+        }
+
+        .btn-whatsapp-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            padding: 13px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+            touch-action: manipulation;
+        }
+
+        /* DISEÑO DE TARJETA DE CUPÓN VIP DE REGISTRO */
+        .coupon-card {
+            background: linear-gradient(135deg, #200015 0%, #400028 100%);
+            border: 3px dashed var(--gold-color);
+            border-radius: 16px;
+            padding: 22px 15px;
+            text-align: center;
+            color: white;
+            margin: 15px 0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            position: relative;
+        }
+
+        .coupon-badge {
+            background: var(--vibrant-gradient);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 4px 12px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .coupon-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            color: var(--gold-color);
+            font-weight: 900;
+            margin: 5px 0;
+        }
+
+        .coupon-code-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--gold-color);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 15px 0;
+        }
+
+        .coupon-code {
+            font-family: monospace;
+            font-size: 1.3rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #ffffff;
+            word-break: break-all;
+        }
+
+        .coupon-instruction {
+            font-size: 0.75rem;
+            color: #ffd700;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        /* CARRITO SIDEBAR */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 360px;
+            height: 100%;
+            background: white;
+            z-index: 2000;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.2);
+            transition: 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-sidebar.open {
+            right: 0;
+        }
+
+        .cart-header {
+            padding: 16px;
+            border-bottom: 2px solid rgba(255, 0, 127, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--pink-light);
+            padding-top: calc(var(--safe-area-top) + 16px);
+        }
+
+        .cart-header h3 {
+            color: var(--pink-dark);
+            font-family: 'Cinzel', serif;
+            font-weight: 800;
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 12px;
+            align-items: center;
+        }
+
+        .cart-item-img {
+            width: 55px;
+            height: 55px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 0, 127, 0.2);
+        }
+
+        .cart-item-details {
+            flex: 1;
+        }
+
+        .cart-item-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .cart-item-price {
+            color: var(--pink-dark);
+            font-size: 0.85rem;
+            font-weight: 800;
+            margin-top: 3px;
+        }
+
+        .cart-footer {
+            padding: 16px;
+            border-top: 2px solid rgba(255, 0, 127, 0.15);
+            background: #fafafa;
+            padding-bottom: calc(var(--safe-area-bottom) + 16px);
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 14px;
+            color: var(--pink-dark);
+        }
+
+        .btn-checkout {
+            width: 100%;
+            background: var(--gold-gradient);
+            color: #000;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            box-shadow: var(--gold-shadow);
+            touch-action: manipulation;
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--dark-bg);
+            color: white;
+            padding: 40px 15px 20px;
+            margin-top: 50px;
+            border-top: 4px solid var(--pink-vibrant);
+        }
+
+        .footer-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            text-align: center;
+        }
+
+        .footer-col h4 {
+            font-family: 'Cinzel', serif;
+            color: var(--gold-color);
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+        }
+
+        .footer-col p {
+            color: #bbb;
+            font-size: 0.85rem;
+            line-height: 1.7;
+        }
+
+        .footer-col a {
+            color: var(--pink-light);
+            text-decoration: none;
+        }
+
+        .copyright {
+            text-align: center;
+            border-top: 1px solid #222;
+            padding-top: 18px;
+            margin-top: 25px;
+            font-size: 0.75rem;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BANNER DESCUENTO -->
+    <div class="top-bar">
+        <span>¡Obtén tu <strong>25% OFF VIP</strong> en tu primer servicio!</span>
+        <button onclick="openModal('loginModal')">Cupón</button>
+    </div>
+
+    <!-- HEADER NAVEGACIÓN -->
+    <header>
+        <nav>
+            <div class="logo-box">
+                <div class="logo-text">SC</div>
+                <div class="logo-sub">STUDIO</div>
+            </div>
+            <div class="nav-icons">
+                <button class="icon-btn" onclick="openModal('loginModal')" title="Mi Cuenta">
+                    <i class="far fa-user"></i>
+                </button>
+                <button class="icon-btn" onclick="toggleCart()" title="Carrito">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="cart-badge" id="cartCount">0</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <h1>Elegancia & <span>Perfección</span></h1>
+        <p>Belleza de lujo, estética avanzada y cosmética exclusiva.</p>
+        <a href="#servicios" class="btn-gold">Agendar Cita VIP</a>
+    </section>
+
+    <!-- SERVICIOS INTEGRADOS -->
+    <section class="container" id="servicios">
+        <div class="section-title">
+            <h2>Nuestros Servicios</h2>
+            <p>Selecciona tu servicio y agenda directamente por WhatsApp</p>
+        </div>
+
+        <!-- CATEGORÍA: CEJAS Y PESTAÑAS -->
+        <div class="category-subtitle"><i class="fas fa-eye"></i> Cejas y Pestañas</div>
+        <div class="services-grid">
+            <div class="service-card">
+                <div>
+                    <div class="service-icon"><i class="fas fa-spa"></i></div>
+                    <h3>Depilación Cejas</h3>
+                    <p>Diseño y perfilado de cejas.</p>
+                </div>
+                <div>
+                    <div class="price">5$</div>
+                    <button class="btn-book-service" onclick="openBookingModal('Depilación Cejas', '5$')">
+                        <i class="fab fa-whatsapp"></i> Cita
+                    </button>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div>
+                    <div class="service-icon"><i class="fas fa-paint-brush"></i></div>
+                    <h3>Cejas + Pigmentación</h3>
+                    <p>Depilación con acabado y sombreado.</p>
+                </div>
+                <div>
+                    <div class="price">10$</div>
+                    <button class="btn-book-service" onclick="openBookingModal('Depilación de Cejas + Pigmentación', '10$')">
+                        <i class="fab fa-whatsapp"></i> Cita
+                    </button>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div>
+                    <div class="service-icon"><i class="fas fa-gem"></i></div>
+                    <h3>Pestañas Naturales</h3>
+                    <p>Efecto a tu preferencia (naturales).</p>
+                </div>
+                <div>
+                    <div class="price">20$</div>
+                    <button class="btn-book-service" onclick="openBookingModal('Pestañas (Efecto Naturales)', '20$')">
+                        <i class="fab fa-whatsapp"></i> Cita
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CATEGORÍA: EPILACIÓN -->
+        <div class="category-subtitle"><i class="fas fa-magic"></i> Epilación</div>
+        <div class="services-grid">
+            <div class="service-card">
+                <div>
+                    <div class="service-icon"><i class="fas fa-smile"></i></div>
+                    <h3>Epilación Bozo</h3>
+                    <p>Remoción suave del área del bozo.</p>
+                </div>
+                <div>
+                    <div class="price">5$</div>
+                    <button class="btn-book-service" onclick="openBookingModal('Epilacion Bozo', '5$')">
+                        <i class="fab fa-whatsapp"></i> Cita
+                    </button>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div>
+                    <div class="service-icon"><i class="fas fa-sparkles"></i></div>
+                    <h3>Epilación Cejas</h3>
+                    <p>Epilación precisa de cejas.</p>
+                </div>
+                <div>
+                    <div class="price">10$</div>
+                    <button class="btn-book-service" onclick="openBookingModal('Epilacion Cejas', '10$')">
+                        <i class="fab fa-whatsapp"></i> Cita
+                    </button>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div>
+                    <div class="service-icon"><i class="fas fa-feather"></i></div>
+                    <h3>Epilación Axilas</h3>
+                    <p>Piel tersa y suave en axilas.</p>
+                </div>
+                <div>
+                    <div class="price">15$</div>
+                    <button class="btn-book-service" onclick="openBookingModal('Epilacion Axilas', '15$')">
+                        <i class="fab fa-whatsapp"></i> Cita
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CATEGORÍA: CABELLO -->
+        <div class="category-subtitle"><i class="fas fa-cut"></i> Tratamientos Capilares</div>
+        <div class="services-grid">
+            <div class="service-card">
+                <div>
+                    <div class="service-icon"><i class="fas fa-fire"></i></div>
+                    <h3>Solo Planchado</h3>
+                    <p>Traer el cabello limpio y seco.</p>
+                </div>
+                <div>
+                    <div class="price">20$</div>
+                    <button class="btn-book-service" onclick="openBookingModal('Solo Planchado (Cabello limpio y seco)', '20$')">
+                        <i class="fab fa-whatsapp"></i> Cita
+                    </button>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div>
+                    <div class="service-icon"><i class="fas fa-tint"></i></div>
+                    <h3>Solo Tinturado</h3>
+                    <p>Debes traer el tinte.</p>
+                </div>
+                <div>
+                    <div class="price">15$</div>
+                    <button class="btn-book-service" onclick="openBookingModal('Solo Tinturado (Traer tinte)', '15$')">
+                        <i class="fab fa-whatsapp"></i> Cita
+                    </button>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div>
+                    <div class="service-icon"><i class="fas fa-shower"></i></div>
+                    <h3>Hidrataciones</h3>
+                    <p>Con baño de brillo incluido.</p>
+                </div>
+                <div>
+                    <div class="price">A partir de 30$</div>
+                    <button class="btn-book-service" onclick="openBookingModal('Hidrataciones con baño de brillo', 'A partir de 30$')">
+                        <i class="fab fa-whatsapp"></i> Cita
+                    </button>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div>
+                    <div class="service-icon"><i class="fas fa-pump-soap"></i></div>
+                    <h3>Keratinas</h3>
+                    <p>Según el largo. Traer producto.</p>
+                </div>
+                <div>
+                    <div class="price">A partir de 70$</div>
+                    <button class="btn-book-service" onclick="openBookingModal('Keratina (Traer producto)', 'A partir de 70$')">
+                        <i class="fab fa-whatsapp"></i> Cita
+                    </button>
+                </div>
+            </div>
+
+            <div class="service-card">
+                <div>
+                    <div class="service-icon"><i class="fas fa-wind"></i></div>
+                    <h3>Cera Fría</h3>
+                    <p>Tratamiento alisador y brillo intenso.</p>
+                </div>
+                <div>
+                    <div class="price">80$</div>
+                    <button class="btn-book-service" onclick="openBookingModal('Cera Fría', '80$')">
+                        <i class="fab fa-whatsapp"></i> Cita
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TIENDA BOUTIQUE -->
+    <section class="container" id="tienda">
+        <div class="section-title">
+            <h2>Boutique Best-Sellers</h2>
+            <p>Cosméticos y prendas más vendidos</p>
+        </div>
+        
+        <div class="store-tabs">
+            <button class="tab-btn active" onclick="filterProducts('all', event)">Todos</button>
+            <button class="tab-btn" onclick="filterProducts('cosmeticos', event)">Maquillaje</button>
+            <button class="tab-btn" onclick="filterProducts('capilar', event)">Capilar</button>
+            <button class="tab-btn" onclick="filterProducts('facial', event)">Facial</button>
+            <button class="tab-btn" onclick="filterProducts('ropa', event)">Ropa</button>
+        </div>
+
+        <div class="products-grid" id="productsGrid"></div>
+    </section>
+
+    <!-- MODAL AGENDAR CITA -->
+    <div class="modal" id="bookingModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('bookingModal')">&times;</span>
+            <div class="modal-header">
+                <h3>Agenda tu Cita</h3>
+                <p>Reserva tu espacio vía WhatsApp</p>
+            </div>
+            <form onsubmit="sendBookingWhatsApp(event)">
+                <div class="form-group">
+                    <label>Servicio</label>
+                    <input type="text" id="bookingServiceInput" readonly style="background:#fff0f5; font-weight:bold; color:var(--pink-dark);">
+                </div>
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="bookingName" placeholder="Tu nombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="bookingDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Hora</label>
+                    <input type="time" id="bookingTime" required>
+                </div>
+                <div class="form-group">
+                    <label>Notas</label>
+                    <textarea id="bookingNotes" rows="2" placeholder="Preferencia opcional"></textarea>
+                </div>
+                <button type="submit" class="btn-whatsapp-submit">
+                    <i class="fab fa-whatsapp"></i> Confirmar Cita
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL PAGO CHECKOUT -->
+    <div class="modal" id="checkoutModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('checkoutModal')">&times;</span>
+            <div class="modal-header">
+                <h3>Completa tu Pago</h3>
+                <p>Procesamos pedidos mediante WhatsApp</p>
+            </div>
+            <form onsubmit="sendCheckoutWhatsApp(event)">
+                <div class="form-group">
+                    <label>Nombre Cliente</label>
+                    <input type="text" id="checkoutName" placeholder="Tu nombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Dirección de Entrega</label>
+                    <input type="text" id="checkoutAddress" placeholder="Dirección completa" required>
+                </div>
+                <div class="form-group">
+                    <label>Método de Pago</label>
+                    <select id="checkoutPayment">
+                        <option value="Transferencia / Pago Móvil">Transferencia / Pago Móvil</option>
+                        <option value="Efectivo $">Efectivo $</option>
+                        <option value="Zelle">Zelle</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-whatsapp-submit">
+                    <i class="fab fa-whatsapp"></i> Hablar con Empresa
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL LOGIN Y CUPÓN GENERADO -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content" id="loginModalContent">
+            <span class="close-modal" onclick="closeModal('loginModal')">&times;</span>
+            <div class="modal-header">
+                <h3>Acceso Clientes VIP</h3>
+                <p>Regístrate para obtener tu cupón del 25% OFF</p>
+            </div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" placeholder="Tu nombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" placeholder="correo@ejemplo.com" required>
+                </div>
+                <button type="submit" class="btn-gold" style="width:100%; border-radius:10px; margin-top:5px;">Obtener Mi Cupón</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CARRITO SIDEBAR -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>Carrito VIP</h3>
+            <span class="close-modal" style="position:static;" onclick="toggleCart()">&times;</span>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">0$</span>
+            </div>
+            <button class="btn-checkout" onclick="openCheckoutModal()">Proceder al Pago</button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="logo-box" style="display:inline-block; margin-bottom:12px;">
+                    <div class="logo-text">SC</div>
+                    <div class="logo-sub">STUDIO</div>
+                </div>
+                <p>El estándar definitivo en belleza femenina y cosmética de alta gama.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Contacto</h4>
+                <p><i class="fas fa-envelope"></i> <a href="mailto:sandraacostaa55@gmail.com">sandraacostaa55@gmail.com</a></p>
+                <p><i class="fas fa-map-marker-alt"></i> Zona Rosa VIP</p>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2026 SC Studio - App Oficial.
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // LISTA DE DOS NUMEROS DE WHATSAPP PARA LAS DUEÑAS
+        const WHATSAPP_NUMBERS = [
+            "573112404852", // Número 1
+            "573112404852"  // Número 2 (puedes reemplazar este segundo número cuando quieras)
+        ];
+
+        // Función que selecciona de forma 100% aleatoria (50% / 50%) cualquiera de las 2 dueñas
+        function getRandomWhatsAppNumber() {
+            const randomIndex = Math.floor(Math.random() * WHATSAPP_NUMBERS.length);
+            return WHATSAPP_NUMBERS[randomIndex];
+        }
+
+        // Función nativa deeplink para WhatsApp en APPs móvil
+        function openWhatsApp(messageText) {
+            const selectedPhone = getRandomWhatsAppNumber();
+            const encodedText = encodeURIComponent(messageText);
+            const nativeUrl = `whatsapp://send?phone=${selectedPhone}&text=${encodedText}`;
+            const webUrl = `https://wa.me/${selectedPhone}?text=${encodedText}`;
+
+            const start = Date.now();
+            window.location.href = nativeUrl;
+
+            setTimeout(() => {
+                if (Date.now() - start < 1500) {
+                    window.open(webUrl, '_blank');
+                }
+            }, 500);
+        }
+
+        // BASE DE DATOS DE PRODUCTOS BOUTIQUE
+        const productsData = [
+            { id: 1, name: "Labial Matte Velvet Gold", category: "cosmeticos", price: 10, img: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&q=80" },
+            { id: 2, name: "Base Liquid Luxury Glow", category: "cosmeticos", price: 15, img: "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=300&q=80" },
+            { id: 3, name: "Paleta Sombras Nude", category: "cosmeticos", price: 18, img: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300&q=80" },
+            { id: 4, name: "Aceite Argán Reparador Pro", category: "capilar", price: 12, img: "https://images.unsplash.com/photo-1608248597261-833244670d19?w=300&q=80" },
+            { id: 5, name: "Sérum Ácido Hialurónico", category: "facial", price: 20, img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300&q=80" },
+            { id: 6, name: "Vestido Satinado Night Silk", category: "ropa", price: 25, img: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=300&q=80" }
+        ];
+
+        let cart = [];
+        let totalAmount = 0;
+
+        function renderProducts(products) {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+
+            products.forEach(p => {
+                grid.innerHTML += `
+                    <div class="product-card">
+                        <div class="product-img-box">
+                            <span class="badge-best">Top</span>
+                            <img src="${p.img}" alt="${p.name}" class="product-img" loading="lazy">
+                        </div>
+                        <div class="product-info">
+                            <div>
+                                <div class="product-category">${p.category}</div>
+                                <h4 class="product-title">${p.name}</h4>
+                            </div>
+                            <div>
+                                <div class="product-price">${p.price}$</div>
+                                <button class="btn-add-cart" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.img}')">
+                                    + Agregar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // CONTROL DE MODALES
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function toggleCart() {
+            document.getElementById('cartSidebar').classList.toggle('open');
+        }
+
+        // AGENDAR CITA POR WHATSAPP (ALEATORIO)
+        function openBookingModal(serviceName, price) {
+            document.getElementById('bookingServiceInput').value = `${serviceName} (${price})`;
+            openModal('bookingModal');
+        }
+
+        function sendBookingWhatsApp(e) {
+            e.preventDefault();
+            const service = document.getElementById('bookingServiceInput').value;
+            const name = document.getElementById('bookingName').value;
+            const date = document.getElementById('bookingDate').value;
+            const time = document.getElementById('bookingTime').value;
+            const notes = document.getElementById('bookingNotes').value;
+
+            const text = `Hola SC Studio, deseo agendar una cita desde la App:\n\n` +
+                         `✨ Servicio: ${service}\n` +
+                         `👤 Cliente: ${name}\n` +
+                         `📅 Fecha: ${date}\n` +
+                         `⏰ Hora: ${time}\n` +
+                         `📝 Notas: ${notes || 'Sin notas'}`;
+
+            openWhatsApp(text);
+            closeModal('bookingModal');
+        }
+
+        // PAGAR PEDIDO POR WHATSAPP (ALEATORIO)
+        function openCheckoutModal() {
+            if (cart.length === 0) {
+                alert('Tu carrito está vacío');
+                return;
+            }
+            toggleCart();
+            openModal('checkoutModal');
+        }
+
+        function sendCheckoutWhatsApp(e) {
+            e.preventDefault();
+            const name = document.getElementById('checkoutName').value;
+            const address = document.getElementById('checkoutAddress').value;
+            const payment = document.getElementById('checkoutPayment').value;
+
+            let itemsList = '';
+            cart.forEach((item, index) => {
+                itemsList += `${index + 1}. ${item.title} - ${item.price}$\n`;
+            });
+
+            const text = `Hola SC Studio, confirmo mi pedido desde la App:\n\n` +
+                         `🛍️ PRODUCTOS:\n${itemsList}\n` +
+                         `💰 TOTAL: ${totalAmount}$\n\n` +
+                         `👤 Cliente: ${name}\n` +
+                         `📍 Dirección: ${address}\n` +
+                         `💳 Método de Pago: ${payment}`;
+
+            openWhatsApp(text);
+            cart = [];
+            updateCartUI();
+            closeModal('checkoutModal');
+        }
+
+        // GENERACIÓN DEL CUPÓN "LAS DIVAS SOMOS MÁS" + NÚMERO ALEATORIO
+        function handleLogin(e) {
+            e.preventDefault();
+            const randomDigits = Math.floor(1000 + Math.random() * 9000);
+            const fullCouponCode = `LAS DIVAS SOMOS MÁS - ${randomDigits}`;
+
+            const modalContent = document.getElementById('loginModalContent');
+            modalContent.innerHTML = `
+                <span class="close-modal" onclick="closeModal('loginModal')">&times;</span>
+                <div class="modal-header">
+                    <h3>¡Felicidades VIP!</h3>
+                    <p>Aquí tienes tu cupón exclusivo de bienvenida</p>
+                </div>
+                
+                <div class="coupon-card">
+                    <span class="coupon-badge">DESCUENTO DEL 25%</span>
+                    <div class="coupon-title">SC STUDIO</div>
+                    <div class="coupon-code-box">
+                        <div class="coupon-code">${fullCouponCode}</div>
+                    </div>
+                    <p class="coupon-instruction">📸 ¡Toma una captura de pantalla a este cupón y muéstralo al agendar tu cita!</p>
+                </div>
+
+                <button class="btn-gold" style="width:100%; margin-top:10px;" onclick="closeModal('loginModal')">
+                    ¡Entendido, ya le tomé captura!
+                </button>
+            `;
+        }
+
+        // LÓGICA DE CARRITO
+        function addToCart(title, price, img) {
+            cart.push({ title, price, img });
+            updateCartUI();
+            toggleCart();
+        }
+
+        function updateCartUI() {
+            const cartItemsContainer = document.getElementById('cartItems');
+            const cartCount = document.getElementById('cartCount');
+            const cartTotal = document.getElementById('cartTotal');
+
+            cartCount.innerText = cart.length;
+
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:30px; font-size:0.85rem;">Tu carrito está vacío</p>';
+                cartTotal.innerText = '0$';
+                totalAmount = 0;
+                return;
+            }
+
+            cartItemsContainer.innerHTML = '';
+            totalAmount = 0;
+
+            cart.forEach((item, index) => {
+                totalAmount += item.price;
+                cartItemsContainer.innerHTML += `
+                    <div class="cart-item">
+                        <img src="${item.img}" class="cart-item-img" alt="${item.title}">
+                        <div class="cart-item-details">
+                            <div class="cart-item-title">${item.title}</div>
+                            <div class="cart-item-price">${item.price}$</div>
+                        </div>
+                        <i class="fas fa-trash-alt" style="color:#ff0055; cursor:pointer;" onclick="removeFromCart(${index})"></i>
+                    </div>
+                `;
+            });
+
+            cartTotal.innerText = totalAmount + '$';
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function filterProducts(category, event) {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (category === 'all') {
+                renderProducts(productsData);
+            } else {
+                const filtered = productsData.filter(p => p.category === category);
+                renderProducts(filtered);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderProducts(productsData);
+        });
+    </script>
+</body>
+</html>
