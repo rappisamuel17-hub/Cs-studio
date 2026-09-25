@@ -1,1379 +1,1207 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SC Studio App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DiDi Food - UI de Navegación Exacta</title>
     
-    <!-- Google Fonts & Font Awesome Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+
+    <!-- FontAwesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Leaflet JS & CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Fonts Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <style>
-        :root {
-            --pink-primary: #ff1493;
-            --pink-vibrant: #ff007f;
-            --pink-dark: #b80058;
-            --pink-light: #ffe4e1;
-            --pink-gradient: linear-gradient(135deg, #ff3399 0%, #ff0066 50%, #d80056 100%);
-            --gold-gradient: linear-gradient(135deg, #fff176 0%, #ffd700 50%, #b8860b 100%);
-            --gold-color: #ffd700;
-            --purple-accent: #8a2be2;
-            --vibrant-gradient: linear-gradient(135deg, #ff007f 0%, #7b2cbf 100%);
-            --dark-bg: #121212;
-            --dark-text: #111111;
-            --light-bg: #fff8fa;
-            --card-shadow: 0 10px 25px rgba(255, 0, 127, 0.15);
-            --gold-shadow: 0 8px 22px rgba(255, 215, 0, 0.4);
-            --safe-area-top: env(safe-area-inset-top, 0px);
-            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-        }
-
-        * {
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
+            overflow: hidden;
+            -webkit-text-size-adjust: 100%;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        body {
-            background-color: var(--light-bg);
-            color: var(--dark-text);
-            overflow-x: hidden;
-            padding-top: var(--safe-area-top);
-            padding-bottom: var(--safe-area-bottom);
-            -webkit-overflow-scrolling: touch;
+        /* Ocultar barra de desplazamiento */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
         }
 
-        input, textarea, select {
-            user-select: auto;
+        /* --- Modo Edición Global --- */
+        body.edit-mode [contenteditable="true"] {
+            outline: 2px dashed #ff5100 !important;
+            outline-offset: 2px;
+            background-color: rgba(255, 81, 0, 0.15);
+            border-radius: 4px;
+            cursor: text;
+            user-select: text !important;
+            -webkit-user-select: text !important;
         }
 
-        /* BANNER TOP ANIMADO */
-        .top-bar {
-            background: linear-gradient(90deg, #ff007f, #8a2be2, #ffd700, #ff007f);
-            background-size: 300% 300%;
-            animation: gradientMove 6s ease infinite;
-            color: white;
-            text-align: center;
-            padding: 9px 12px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 2px 10px rgba(255, 0, 127, 0.3);
-        }
-
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .top-bar button {
-            background: white;
-            color: var(--pink-dark);
-            border: none;
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-weight: 800;
-            font-size: 0.75rem;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-
-        /* HEADER APP */
-        header {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(12px);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 2px solid rgba(255, 0, 127, 0.2);
-            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.08);
-        }
-
-        nav {
-            max-width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-        }
-
-        .logo-box {
-            background: var(--vibrant-gradient);
-            padding: 6px 18px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(255, 0, 127, 0.3);
-        }
-
-        .logo-text {
-            font-family: 'Cinzel', serif;
-            font-size: 1.7rem;
-            font-weight: 900;
-            background: var(--gold-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            line-height: 1;
-        }
-
-        .logo-sub {
-            font-family: 'Cinzel', serif;
-            font-size: 0.58rem;
-            color: white;
-            letter-spacing: 3px;
-            border-top: 1px solid rgba(255, 215, 0, 0.8);
-            padding-top: 2px;
-            font-weight: 700;
-        }
-
-        .nav-icons {
-            display: flex;
-            gap: 18px;
-            align-items: center;
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            font-size: 1.3rem;
-            color: var(--pink-dark);
-            cursor: pointer;
-            position: relative;
-            padding: 5px;
-            touch-action: manipulation;
-        }
-
-        .cart-badge {
+        /* --- Animación de Carga Órbita 3D (Planetas Reales) --- */
+        .didi-loader {
             position: absolute;
-            top: -2px;
-            right: -4px;
-            background: var(--vibrant-gradient);
-            color: white;
-            font-size: 0.65rem;
-            width: 19px;
-            height: 19px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        /* HERO SECTION */
-        .hero {
-            background: linear-gradient(rgba(20, 0, 15, 0.55), rgba(20, 0, 15, 0.75)), 
-                        url('https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80') center/cover no-repeat;
-            padding: 65px 20px;
-            text-align: center;
-            color: white;
-            border-bottom: 4px solid var(--pink-vibrant);
-        }
-
-        .hero h1 {
-            font-family: 'Cinzel', serif;
-            font-size: 2.3rem;
-            font-weight: 900;
-            margin-bottom: 12px;
-            line-height: 1.2;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
-
-        .hero h1 span {
-            background: var(--gold-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero p {
-            font-size: 0.98rem;
-            margin-bottom: 25px;
-            font-weight: 400;
-            text-shadow: 0 1px 5px rgba(0,0,0,0.5);
-        }
-
-        .btn-gold {
-            background: var(--gold-gradient);
-            color: #111;
-            padding: 14px 32px;
-            border: none;
-            border-radius: 25px;
-            font-size: 0.88rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            box-shadow: var(--gold-shadow);
-            touch-action: manipulation;
-        }
-
-        /* SECCIONES Y TITULOS */
-        .container {
-            padding: 0 15px;
-        }
-
-        .section-title {
-            text-align: center;
-            margin: 40px 0 25px;
-        }
-
-        .section-title h2 {
-            font-family: 'Cinzel', serif;
-            font-size: 1.9rem;
-            color: var(--pink-dark);
-            position: relative;
-            display: inline-block;
-            font-weight: 900;
-        }
-
-        .section-title h2::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
             left: 50%;
-            transform: translateX(-50%);
-            width: 70px;
-            height: 4px;
-            background: var(--vibrant-gradient);
-            border-radius: 3px;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 20px;
+            pointer-events: none;
+            z-index: 30;
         }
 
-        .section-title p {
-            color: #666;
-            margin-top: 12px;
-            font-size: 0.88rem;
-            font-weight: 500;
-        }
-
-        /* SERVICIOS DE SALON */
-        .category-subtitle {
-            margin: 28px 0 14px;
-            font-size: 1.1rem;
-            color: white;
-            background: var(--vibrant-gradient);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(255, 0, 127, 0.2);
-        }
-
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-        }
-
-        .service-card {
-            background: white;
-            border-radius: 14px;
-            padding: 16px 12px;
-            text-align: center;
-            box-shadow: var(--card-shadow);
-            border: 2px solid rgba(255, 0, 127, 0.12);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.2s ease;
-        }
-
-        .service-card:active {
-            transform: scale(0.98);
-        }
-
-        .service-icon {
-            width: 52px;
-            height: 52px;
-            background: linear-gradient(135deg, #ffe4e1 0%, #ffd1dc 100%);
-            color: var(--pink-vibrant);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            margin: 0 auto 10px;
-            border: 2px solid rgba(255, 0, 127, 0.25);
-            box-shadow: 0 4px 10px rgba(255, 0, 127, 0.15);
-        }
-
-        .service-card h3 {
-            font-family: 'Cinzel', serif;
-            font-size: 0.95rem;
-            margin-bottom: 6px;
-            color: #111;
-            font-weight: 700;
-        }
-
-        .service-card p {
-            font-size: 0.76rem;
-            color: #666;
-            margin-bottom: 10px;
-            line-height: 1.3;
-        }
-
-        .price {
-            font-weight: 800;
-            color: var(--pink-dark);
-            font-size: 1.15rem;
-            margin-bottom: 8px;
-        }
-
-        .btn-book-service {
-            width: 100%;
-            background: var(--pink-gradient);
-            color: white;
-            border: none;
-            padding: 10px 5px;
-            border-radius: 20px;
-            font-weight: 800;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            box-shadow: 0 4px 12px rgba(255, 0, 127, 0.3);
-            touch-action: manipulation;
-        }
-
-        /* TIENDA DE PRODUCTOS */
-        .store-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 25px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .store-tabs::-webkit-scrollbar {
-            display: none;
-        }
-
-        .tab-btn {
-            background: white;
-            border: 2px solid rgba(255, 0, 127, 0.2);
-            color: var(--pink-dark);
-            padding: 8px 18px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.8rem;
-            white-space: nowrap;
-            touch-action: manipulation;
-        }
-
-        .tab-btn.active {
-            background: var(--vibrant-gradient);
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 4px 12px rgba(255, 0, 127, 0.3);
-        }
-
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .product-card {
-            background: white;
-            border-radius: 14px;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-            border: 1px solid rgba(255, 0, 127, 0.1);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .product-img-box {
-            position: relative;
-            width: 100%;
-            height: 140px;
-            background: #fafafa;
-        }
-
-        .product-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .badge-best {
+        .didi-loader .planet {
             position: absolute;
-            top: 6px;
-            left: 6px;
-            background: var(--gold-gradient);
-            color: #000;
-            font-size: 0.58rem;
-            font-weight: 800;
-            padding: 3px 7px;
-            border-radius: 8px;
-            text-transform: uppercase;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            width: 10px;
+            height: 10px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            top: 5px;
+            left: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
         }
 
-        .product-info {
-            padding: 10px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            justify-content: space-between;
+        .didi-loader .planet:nth-child(1) {
+            animation: orbit-1 1.2s linear infinite;
         }
 
-        .product-category {
-            font-size: 0.65rem;
-            color: var(--pink-vibrant);
-            text-transform: uppercase;
-            font-weight: 800;
+        .didi-loader .planet:nth-child(2) {
+            animation: orbit-2 1.2s linear infinite;
         }
 
-        .product-title {
-            font-size: 0.82rem;
-            margin: 3px 0 6px;
-            font-weight: 700;
-            line-height: 1.2;
-            min-height: 2.4em;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+        @keyframes orbit-1 {
+            0%   { transform: translate(-20px, 0px) scale(0.6); z-index: 1; opacity: 0.8; }
+            25%  { transform: translate(0px, 4px) scale(0.85); z-index: 2; opacity: 1; }
+            50%  { transform: translate(20px, 0px) scale(1.1); z-index: 3; opacity: 1; }
+            75%  { transform: translate(0px, -4px) scale(0.85); z-index: 2; opacity: 1; }
+            100% { transform: translate(-20px, 0px) scale(0.6); z-index: 1; opacity: 0.8; }
         }
 
-        .product-price {
-            font-weight: 800;
-            font-size: 1rem;
-            color: var(--pink-dark);
-            margin-bottom: 8px;
+        @keyframes orbit-2 {
+            0%   { transform: translate(20px, 0px) scale(1.1); z-index: 3; opacity: 1; }
+            25%  { transform: translate(0px, -4px) scale(0.85); z-index: 2; opacity: 1; }
+            50%  { transform: translate(-20px, 0px) scale(0.6); z-index: 1; opacity: 0.8; }
+            75%  { transform: translate(0px, 4px) scale(0.85); z-index: 2; opacity: 1; }
+            100% { transform: translate(20px, 0px) scale(1.1); z-index: 3; opacity: 1; }
         }
 
-        .btn-add-cart {
-            width: 100%;
-            background: var(--dark-text);
-            color: white;
-            border: none;
-            padding: 9px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            touch-action: manipulation;
-        }
-
-        /* MODALES */
-        .modal {
-            display: none;
-            position: fixed;
+        /* --- Contenedores de Mapa --- */
+        .real-map-container {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.75);
-            backdrop-filter: blur(5px);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
+            z-index: 0;
+            background-color: #f3f4f6;
+            transition: background-color 0.3s ease;
         }
 
-        .modal-content {
-            background: white;
-            padding: 25px 20px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 420px;
-            position: relative;
-            max-height: 88vh;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            border: 2px solid var(--pink-vibrant);
+        .navy-dark-map .leaflet-tile {
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%) !important;
         }
 
-        .close-modal {
+        .dark-map-bg { background-color: #0b1329 !important; }
+        .leaflet-control-attribution { display: none !important; }
+
+        /* Bottom Sheet Adaptable */
+        .bottom-sheet {
             position: absolute;
-            top: 12px;
-            right: 16px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--pink-dark);
-            padding: 5px;
-            font-weight: bold;
-        }
-
-        .modal-header {
-            text-align: center;
-            margin-bottom: 18px;
-        }
-
-        .modal-header h3 {
-            font-family: 'Cinzel', serif;
-            font-size: 1.4rem;
-            color: var(--pink-dark);
-            font-weight: 800;
-        }
-
-        .modal-header p {
-            font-size: 0.82rem;
-            color: #666;
-            margin-top: 4px;
-        }
-
-        .form-group {
-            margin-bottom: 14px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #333;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
+            bottom: 0;
+            left: 0;
             width: 100%;
-            padding: 11px;
-            border: 2px solid #ffe0ec;
-            border-radius: 10px;
-            outline: none;
-            font-size: 0.88rem;
-            transition: border-color 0.2s;
+            border-radius: 24px 24px 0 0;
+            box-shadow: 0 -4px 25px rgba(0,0,0,0.15);
+            padding: 10px 20px 24px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 500;
+            animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            border-color: var(--pink-vibrant);
+        html.dark .bottom-sheet { box-shadow: 0 -6px 25px rgba(0,0,0,0.6); }
+
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes slideDown { from { transform: translateY(0); } to { transform: translateY(100%); } }
+        .slide-down-animation { animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards !important; }
+
+        .sheet-handle {
+            width: 40px;
+            height: 4px;
+            border-radius: 2px;
+            margin-bottom: 12px;
+            transition: background-color 0.3s ease;
         }
 
-        .btn-whatsapp-submit {
-            width: 100%;
-            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-            color: white;
-            padding: 13px;
-            border: none;
-            border-radius: 25px;
-            font-weight: 800;
-            cursor: pointer;
-            font-size: 0.9rem;
-            text-transform: uppercase;
+        .animation-slot {
+            position: relative;
+            width: 52px;
+            height: 52px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
-            touch-action: manipulation;
         }
 
-        /* DISEÑO DE TARJETA DE CUPÓN VIP DE REGISTRO */
-        .coupon-card {
-            background: linear-gradient(135deg, #200015 0%, #400028 100%);
-            border: 3px dashed var(--gold-color);
-            border-radius: 16px;
-            padding: 22px 15px;
-            text-align: center;
-            color: white;
-            margin: 15px 0;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-            position: relative;
+        .success-check-badge, .restaurant-badge-logo {
+            position: absolute;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .coupon-badge {
-            background: var(--vibrant-gradient);
-            color: white;
-            font-size: 0.75rem;
-            font-weight: 800;
-            padding: 4px 12px;
-            border-radius: 12px;
-            display: inline-block;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
+        .success-check-badge {
+            background-color: #34a853;
+            box-shadow: 0 2px 8px rgba(52, 168, 83, 0.4);
+            animation: toggleIconAnimation 4s ease-in-out infinite;
+        }
+        .success-check-badge svg { width: 24px; height: 24px; fill: #ffffff; }
+
+        .restaurant-badge-logo {
+            background-size: cover;
+            background-position: center;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            animation: toggleLogoAnimation 4s ease-in-out infinite;
         }
 
-        .coupon-title {
-            font-family: 'Cinzel', serif;
-            font-size: 1.8rem;
-            color: var(--gold-color);
-            font-weight: 900;
-            margin: 5px 0;
-        }
+        @keyframes toggleIconAnimation { 0%, 35%, 100% { opacity: 1; transform: scale(1); } 45%, 90% { opacity: 0; transform: scale(0.5); } }
+        @keyframes toggleLogoAnimation { 0%, 35%, 100% { opacity: 0; transform: scale(0.5); } 45%, 90% { opacity: 1; transform: scale(1); } }
 
-        .coupon-code-box {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid var(--gold-color);
-            border-radius: 10px;
-            padding: 12px;
-            margin: 15px 0;
-        }
-
-        .coupon-code {
-            font-family: monospace;
-            font-size: 1.3rem;
-            font-weight: 900;
-            letter-spacing: 2px;
+        .btn-action {
+            width: 100%;
+            height: 48px;
+            background-color: #ff5a00;
             color: #ffffff;
-            word-break: break-all;
-        }
-
-        .coupon-instruction {
-            font-size: 0.75rem;
-            color: #ffd700;
-            font-weight: 600;
-            margin-top: 8px;
-        }
-
-        /* CARRITO SIDEBAR */
-        .cart-sidebar {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 100%;
-            max-width: 360px;
-            height: 100%;
-            background: white;
-            z-index: 2000;
-            box-shadow: -5px 0 25px rgba(0,0,0,0.2);
-            transition: 0.3s ease-in-out;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .cart-sidebar.open {
-            right: 0;
-        }
-
-        .cart-header {
-            padding: 16px;
-            border-bottom: 2px solid rgba(255, 0, 127, 0.15);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--pink-light);
-            padding-top: calc(var(--safe-area-top) + 16px);
-        }
-
-        .cart-header h3 {
-            color: var(--pink-dark);
-            font-family: 'Cinzel', serif;
-            font-weight: 800;
-        }
-
-        .cart-items {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .cart-item {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 14px;
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 12px;
-            align-items: center;
-        }
-
-        .cart-item-img {
-            width: 55px;
-            height: 55px;
-            border-radius: 8px;
-            object-fit: cover;
-            border: 1px solid rgba(255, 0, 127, 0.2);
-        }
-
-        .cart-item-details {
-            flex: 1;
-        }
-
-        .cart-item-title {
-            font-size: 0.82rem;
-            font-weight: 700;
-        }
-
-        .cart-item-price {
-            color: var(--pink-dark);
-            font-size: 0.85rem;
-            font-weight: 800;
-            margin-top: 3px;
-        }
-
-        .cart-footer {
-            padding: 16px;
-            border-top: 2px solid rgba(255, 0, 127, 0.15);
-            background: #fafafa;
-            padding-bottom: calc(var(--safe-area-bottom) + 16px);
-        }
-
-        .cart-total {
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.15rem;
-            font-weight: 800;
-            margin-bottom: 14px;
-            color: var(--pink-dark);
-        }
-
-        .btn-checkout {
-            width: 100%;
-            background: var(--gold-gradient);
-            color: #000;
-            padding: 13px;
             border: none;
-            border-radius: 10px;
-            font-weight: 800;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            box-shadow: var(--gold-shadow);
-            touch-action: manipulation;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn-action:active { transform: scale(0.98); }
+
+        .stage-transition { transition: opacity 0.3s ease-in-out; }
+
+        /* --- ETAPA 2: PANEL DE DETALLES DESLIZABLE --- */
+        #stage2-nav-sheet {
+            height: 245px;
+            max-height: 86vh;
+            overflow: hidden;
+            touch-action: pan-y;
+            will-change: height, transform;
         }
 
-        /* FOOTER */
-        footer {
-            background: var(--dark-bg);
-            color: white;
-            padding: 40px 15px 20px;
-            margin-top: 50px;
-            border-top: 4px solid var(--pink-vibrant);
+        #stage2-nav-sheet.stage2-sheet-expanded {
+            height: min(86vh, 760px);
+            overflow-y: auto;
+            overscroll-behavior: contain;
         }
 
-        .footer-grid {
+        #stage2-nav-sheet .stage2-expand-handle {
+            width: 62px;
+            height: 6px;
+            border-radius: 999px;
+            background: #d7d7da;
+            margin: 0 auto 18px;
+            flex-shrink: 0;
+            cursor: grab;
+        }
+
+        html.dark #stage2-nav-sheet .stage2-expand-handle {
+            background: #55565a;
+        }
+
+        #stage2-nav-sheet .stage2-details-content {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transform: translateY(12px);
+            transition: opacity .25s ease, max-height .35s ease, transform .35s ease;
+        }
+
+        #stage2-nav-sheet.stage2-sheet-expanded .stage2-details-content {
+            opacity: 1;
+            max-height: 700px;
+            transform: translateY(0);
+        }
+
+        .stage2-detail-card {
+            border: 1px solid #d7d7da;
+            border-radius: 24px;
+            background: #fff;
+            padding: 26px 20px 22px;
+        }
+
+        html.dark .stage2-detail-card {
+            border-color: #3a3a3c;
+            background: #121212;
+        }
+
+        .stage2-contact-button {
+            width: 64px;
+            height: 64px;
+            border-radius: 22px;
+            background: #f1f1f5;
             display: flex;
-            flex-direction: column;
-            gap: 25px;
-            text-align: center;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: #111827;
         }
 
-        .footer-col h4 {
-            font-family: 'Cinzel', serif;
-            color: var(--gold-color);
-            margin-bottom: 12px;
-            font-size: 1.05rem;
+        html.dark .stage2-contact-button {
+            background: #2c2c2e;
+            color: #fff;
         }
 
-        .footer-col p {
-            color: #bbb;
-            font-size: 0.85rem;
-            line-height: 1.7;
+        .stage2-cash-icon {
+            width: 34px;
+            height: 34px;
+            border: 2px solid currentColor;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 18px;
+            font-weight: 900;
         }
 
-        .footer-col a {
-            color: var(--pink-light);
-            text-decoration: none;
+        .stage2-cash-value {
+            color: #ea580c;
+            font-weight: 800;
         }
 
-        .copyright {
-            text-align: center;
-            border-top: 1px solid #222;
-            padding-top: 18px;
-            margin-top: 25px;
-            font-size: 0.75rem;
-            color: #777;
+        .stage2-help-card {
+            min-height: 76px;
         }
+
+        @media (max-width: 420px) {
+            #stage2-nav-sheet {
+                height: 230px;
+            }
+
+            #stage2-nav-sheet.stage2-sheet-expanded {
+                height: 88vh;
+            }
+
+            .stage2-detail-card {
+                padding: 22px 18px 20px;
+            }
+
+            .stage2-contact-button {
+                width: 58px;
+                height: 58px;
+                border-radius: 20px;
+            }
+        }
+
     </style>
 </head>
-<body>
+<body class="bg-gray-100 dark:bg-black text-gray-900 dark:text-white flex justify-center items-center h-screen w-screen p-0 m-0 overflow-hidden transition-colors duration-300">
 
-    <!-- BANNER DESCUENTO -->
-    <div class="top-bar">
-        <span>¡Obtén tu <strong>25% OFF VIP</strong> en tu primer servicio!</span>
-        <button onclick="openModal('loginModal')">Cupón</button>
+    <!-- Input de imagen configurado para no ser bloqueado en móviles -->
+    <input type="file" id="image-file-input" accept="image/*" class="w-0 h-0 absolute opacity-0" style="z-index: -100;">
+
+    <!-- Botón de Modo Oscuro -->
+    <div id="dark-mode-container" class="fixed top-3 right-3 z-50 flex items-center gap-2 transition-opacity duration-700">
+        <button id="btn-dark-mode-toggle" title="Alternar Modo Oscuro / Claro" class="w-9 h-9 bg-white dark:bg-[#1c1c1e] text-gray-800 dark:text-yellow-400 rounded-full flex items-center justify-center shadow-lg border border-gray-200 dark:border-[#2c2c2e] active:scale-95 transition-all">
+            <i id="dark-mode-icon" class="fa-solid fa-moon text-sm"></i>
+        </button>
     </div>
 
-    <!-- HEADER NAVEGACIÓN -->
-    <header>
-        <nav>
-            <div class="logo-box">
-                <div class="logo-text">SC</div>
-                <div class="logo-sub">STUDIO</div>
-            </div>
-            <div class="nav-icons">
-                <button class="icon-btn" onclick="openModal('loginModal')" title="Mi Cuenta">
-                    <i class="far fa-user"></i>
-                </button>
-                <button class="icon-btn" onclick="toggleCart()" title="Carrito">
-                    <i class="fas fa-shopping-bag"></i>
-                    <span class="cart-badge" id="cartCount">0</span>
-                </button>
-            </div>
-        </nav>
-    </header>
-
-    <!-- HERO SECTION -->
-    <section class="hero">
-        <h1>Elegancia & <span>Perfección</span></h1>
-        <p>Belleza de lujo, estética avanzada y cosmética exclusiva.</p>
-        <a href="#servicios" class="btn-gold">Agendar Cita VIP</a>
-    </section>
-
-    <!-- SERVICIOS INTEGRADOS -->
-    <section class="container" id="servicios">
-        <div class="section-title">
-            <h2>Nuestros Servicios</h2>
-            <p>Selecciona tu servicio y agenda directamente por WhatsApp</p>
-        </div>
-
-        <!-- CATEGORÍA: CEJAS Y PESTAÑAS -->
-        <div class="category-subtitle"><i class="fas fa-eye"></i> Cejas y Pestañas</div>
-        <div class="services-grid">
-            <div class="service-card">
-                <div>
-                    <div class="service-icon"><i class="fas fa-spa"></i></div>
-                    <h3>Depilación Cejas</h3>
-                    <p>Diseño y perfilado de cejas.</p>
-                </div>
-                <div>
-                    <div class="price">5$</div>
-                    <button class="btn-book-service" onclick="openBookingModal('Depilación Cejas', '5$')">
-                        <i class="fab fa-whatsapp"></i> Cita
-                    </button>
-                </div>
-            </div>
-
-            <div class="service-card">
-                <div>
-                    <div class="service-icon"><i class="fas fa-paint-brush"></i></div>
-                    <h3>Cejas + Pigmentación</h3>
-                    <p>Depilación con acabado y sombreado.</p>
-                </div>
-                <div>
-                    <div class="price">10$</div>
-                    <button class="btn-book-service" onclick="openBookingModal('Depilación de Cejas + Pigmentación', '10$')">
-                        <i class="fab fa-whatsapp"></i> Cita
-                    </button>
-                </div>
-            </div>
-
-            <div class="service-card">
-                <div>
-                    <div class="service-icon"><i class="fas fa-gem"></i></div>
-                    <h3>Pestañas Naturales</h3>
-                    <p>Efecto a tu preferencia (naturales).</p>
-                </div>
-                <div>
-                    <div class="price">20$</div>
-                    <button class="btn-book-service" onclick="openBookingModal('Pestañas (Efecto Naturales)', '20$')">
-                        <i class="fab fa-whatsapp"></i> Cita
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- CATEGORÍA: EPILACIÓN -->
-        <div class="category-subtitle"><i class="fas fa-magic"></i> Epilación</div>
-        <div class="services-grid">
-            <div class="service-card">
-                <div>
-                    <div class="service-icon"><i class="fas fa-smile"></i></div>
-                    <h3>Epilación Bozo</h3>
-                    <p>Remoción suave del área del bozo.</p>
-                </div>
-                <div>
-                    <div class="price">5$</div>
-                    <button class="btn-book-service" onclick="openBookingModal('Epilacion Bozo', '5$')">
-                        <i class="fab fa-whatsapp"></i> Cita
-                    </button>
-                </div>
-            </div>
-
-            <div class="service-card">
-                <div>
-                    <div class="service-icon"><i class="fas fa-sparkles"></i></div>
-                    <h3>Epilación Cejas</h3>
-                    <p>Epilación precisa de cejas.</p>
-                </div>
-                <div>
-                    <div class="price">10$</div>
-                    <button class="btn-book-service" onclick="openBookingModal('Epilacion Cejas', '10$')">
-                        <i class="fab fa-whatsapp"></i> Cita
-                    </button>
-                </div>
-            </div>
-
-            <div class="service-card">
-                <div>
-                    <div class="service-icon"><i class="fas fa-feather"></i></div>
-                    <h3>Epilación Axilas</h3>
-                    <p>Piel tersa y suave en axilas.</p>
-                </div>
-                <div>
-                    <div class="price">15$</div>
-                    <button class="btn-book-service" onclick="openBookingModal('Epilacion Axilas', '15$')">
-                        <i class="fab fa-whatsapp"></i> Cita
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- CATEGORÍA: CABELLO -->
-        <div class="category-subtitle"><i class="fas fa-cut"></i> Tratamientos Capilares</div>
-        <div class="services-grid">
-            <div class="service-card">
-                <div>
-                    <div class="service-icon"><i class="fas fa-fire"></i></div>
-                    <h3>Solo Planchado</h3>
-                    <p>Traer el cabello limpio y seco.</p>
-                </div>
-                <div>
-                    <div class="price">20$</div>
-                    <button class="btn-book-service" onclick="openBookingModal('Solo Planchado (Cabello limpio y seco)', '20$')">
-                        <i class="fab fa-whatsapp"></i> Cita
-                    </button>
-                </div>
-            </div>
-
-            <div class="service-card">
-                <div>
-                    <div class="service-icon"><i class="fas fa-tint"></i></div>
-                    <h3>Solo Tinturado</h3>
-                    <p>Debes traer el tinte.</p>
-                </div>
-                <div>
-                    <div class="price">15$</div>
-                    <button class="btn-book-service" onclick="openBookingModal('Solo Tinturado (Traer tinte)', '15$')">
-                        <i class="fab fa-whatsapp"></i> Cita
-                    </button>
-                </div>
-            </div>
-
-            <div class="service-card">
-                <div>
-                    <div class="service-icon"><i class="fas fa-shower"></i></div>
-                    <h3>Hidrataciones</h3>
-                    <p>Con baño de brillo incluido.</p>
-                </div>
-                <div>
-                    <div class="price">A partir de 30$</div>
-                    <button class="btn-book-service" onclick="openBookingModal('Hidrataciones con baño de brillo', 'A partir de 30$')">
-                        <i class="fab fa-whatsapp"></i> Cita
-                    </button>
-                </div>
-            </div>
-
-            <div class="service-card">
-                <div>
-                    <div class="service-icon"><i class="fas fa-pump-soap"></i></div>
-                    <h3>Keratinas</h3>
-                    <p>Según el largo. Traer producto.</p>
-                </div>
-                <div>
-                    <div class="price">A partir de 70$</div>
-                    <button class="btn-book-service" onclick="openBookingModal('Keratina (Traer producto)', 'A partir de 70$')">
-                        <i class="fab fa-whatsapp"></i> Cita
-                    </button>
-                </div>
-            </div>
-
-            <div class="service-card">
-                <div>
-                    <div class="service-icon"><i class="fas fa-wind"></i></div>
-                    <h3>Cera Fría</h3>
-                    <p>Tratamiento alisador y brillo intenso.</p>
-                </div>
-                <div>
-                    <div class="price">80$</div>
-                    <button class="btn-book-service" onclick="openBookingModal('Cera Fría', '80$')">
-                        <i class="fab fa-whatsapp"></i> Cita
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- TIENDA BOUTIQUE -->
-    <section class="container" id="tienda">
-        <div class="section-title">
-            <h2>Boutique Best-Sellers</h2>
-            <p>Cosméticos y prendas más vendidos</p>
-        </div>
+    <!-- ========================================== -->
+    <!-- ETAPA 1: INTERFAZ DE DETALLES REPLICADA    -->
+    <!-- ========================================== -->
+    <div id="stage-1" class="w-full h-full flex justify-center items-center stage-transition bg-black sm:bg-transparent z-40 relative">
         
-        <div class="store-tabs">
-            <button class="tab-btn active" onclick="filterProducts('all', event)">Todos</button>
-            <button class="tab-btn" onclick="filterProducts('cosmeticos', event)">Maquillaje</button>
-            <button class="tab-btn" onclick="filterProducts('capilar', event)">Capilar</button>
-            <button class="tab-btn" onclick="filterProducts('facial', event)">Facial</button>
-            <button class="tab-btn" onclick="filterProducts('ropa', event)">Ropa</button>
-        </div>
+        <div id="app-container" class="w-full h-full sm:max-w-md sm:h-[92vh] sm:rounded-[30px] bg-[#f5f6f8] dark:bg-[#121212] overflow-hidden flex flex-col relative shadow-2xl transition-colors duration-300">
 
-        <div class="products-grid" id="productsGrid"></div>
-    </section>
-
-    <!-- MODAL AGENDAR CITA -->
-    <div class="modal" id="bookingModal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('bookingModal')">&times;</span>
-            <div class="modal-header">
-                <h3>Agenda tu Cita</h3>
-                <p>Reserva tu espacio vía WhatsApp</p>
-            </div>
-            <form onsubmit="sendBookingWhatsApp(event)">
-                <div class="form-group">
-                    <label>Servicio</label>
-                    <input type="text" id="bookingServiceInput" readonly style="background:#fff0f5; font-weight:bold; color:var(--pink-dark);">
-                </div>
-                <div class="form-group">
-                    <label>Nombre Completo</label>
-                    <input type="text" id="bookingName" placeholder="Tu nombre" required>
-                </div>
-                <div class="form-group">
-                    <label>Fecha</label>
-                    <input type="date" id="bookingDate" required>
-                </div>
-                <div class="form-group">
-                    <label>Hora</label>
-                    <input type="time" id="bookingTime" required>
-                </div>
-                <div class="form-group">
-                    <label>Notas</label>
-                    <textarea id="bookingNotes" rows="2" placeholder="Preferencia opcional"></textarea>
-                </div>
-                <button type="submit" class="btn-whatsapp-submit">
-                    <i class="fab fa-whatsapp"></i> Confirmar Cita
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL PAGO CHECKOUT -->
-    <div class="modal" id="checkoutModal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('checkoutModal')">&times;</span>
-            <div class="modal-header">
-                <h3>Completa tu Pago</h3>
-                <p>Procesamos pedidos mediante WhatsApp</p>
-            </div>
-            <form onsubmit="sendCheckoutWhatsApp(event)">
-                <div class="form-group">
-                    <label>Nombre Cliente</label>
-                    <input type="text" id="checkoutName" placeholder="Tu nombre" required>
-                </div>
-                <div class="form-group">
-                    <label>Dirección de Entrega</label>
-                    <input type="text" id="checkoutAddress" placeholder="Dirección completa" required>
-                </div>
-                <div class="form-group">
-                    <label>Método de Pago</label>
-                    <select id="checkoutPayment">
-                        <option value="Transferencia / Pago Móvil">Transferencia / Pago Móvil</option>
-                        <option value="Efectivo $">Efectivo $</option>
-                        <option value="Zelle">Zelle</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn-whatsapp-submit">
-                    <i class="fab fa-whatsapp"></i> Hablar con Empresa
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL LOGIN Y CUPÓN GENERADO -->
-    <div class="modal" id="loginModal">
-        <div class="modal-content" id="loginModalContent">
-            <span class="close-modal" onclick="closeModal('loginModal')">&times;</span>
-            <div class="modal-header">
-                <h3>Acceso Clientes VIP</h3>
-                <p>Regístrate para obtener tu cupón del 25% OFF</p>
-            </div>
-            <form onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label>Nombre Completo</label>
-                    <input type="text" placeholder="Tu nombre" required>
-                </div>
-                <div class="form-group">
-                    <label>Correo Electrónico</label>
-                    <input type="email" placeholder="correo@ejemplo.com" required>
-                </div>
-                <button type="submit" class="btn-gold" style="width:100%; border-radius:10px; margin-top:5px;">Obtener Mi Cupón</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- CARRITO SIDEBAR -->
-    <div class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header">
-            <h3>Carrito VIP</h3>
-            <span class="close-modal" style="position:static;" onclick="toggleCart()">&times;</span>
-        </div>
-        <div class="cart-items" id="cartItems"></div>
-        <div class="cart-footer">
-            <div class="cart-total">
-                <span>Total:</span>
-                <span id="cartTotal">0$</span>
-            </div>
-            <button class="btn-checkout" onclick="openCheckoutModal()">Proceder al Pago</button>
-        </div>
-    </div>
-
-    <!-- FOOTER -->
-    <footer>
-        <div class="footer-grid">
-            <div class="footer-col">
-                <div class="logo-box" style="display:inline-block; margin-bottom:12px;">
-                    <div class="logo-text">SC</div>
-                    <div class="logo-sub">STUDIO</div>
-                </div>
-                <p>El estándar definitivo en belleza femenina y cosmética de alta gama.</p>
-            </div>
-            <div class="footer-col">
-                <h4>Contacto</h4>
-                <p><i class="fas fa-envelope"></i> <a href="mailto:sandraacostaa55@gmail.com">sandraacostaa55@gmail.com</a></p>
-                <p><i class="fas fa-map-marker-alt"></i> Zona Rosa VIP</p>
-            </div>
-        </div>
-        <div class="copyright">
-            &copy; 2026 SC Studio - App Oficial.
-        </div>
-    </footer>
-
-    <!-- JAVASCRIPT -->
-    <script>
-        // LISTA DE DOS NUMEROS DE WHATSAPP PARA LAS DUEÑAS
-        const WHATSAPP_NUMBERS = [
-            "573112404852", // Número 1
-            "573112404852"  // Número 2 (puedes reemplazar este segundo número cuando quieras)
-        ];
-
-        // Función que selecciona de forma 100% aleatoria (50% / 50%) cualquiera de las 2 dueñas
-        function getRandomWhatsAppNumber() {
-            const randomIndex = Math.floor(Math.random() * WHATSAPP_NUMBERS.length);
-            return WHATSAPP_NUMBERS[randomIndex];
-        }
-
-        // Función nativa deeplink para WhatsApp en APPs móvil
-        function openWhatsApp(messageText) {
-            const selectedPhone = getRandomWhatsAppNumber();
-            const encodedText = encodeURIComponent(messageText);
-            const nativeUrl = `whatsapp://send?phone=${selectedPhone}&text=${encodedText}`;
-            const webUrl = `https://wa.me/${selectedPhone}?text=${encodedText}`;
-
-            const start = Date.now();
-            window.location.href = nativeUrl;
-
-            setTimeout(() => {
-                if (Date.now() - start < 1500) {
-                    window.open(webUrl, '_blank');
-                }
-            }, 500);
-        }
-
-        // BASE DE DATOS DE PRODUCTOS BOUTIQUE
-        const productsData = [
-            { id: 1, name: "Labial Matte Velvet Gold", category: "cosmeticos", price: 10, img: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&q=80" },
-            { id: 2, name: "Base Liquid Luxury Glow", category: "cosmeticos", price: 15, img: "https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=300&q=80" },
-            { id: 3, name: "Paleta Sombras Nude", category: "cosmeticos", price: 18, img: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300&q=80" },
-            { id: 4, name: "Aceite Argán Reparador Pro", category: "capilar", price: 12, img: "https://images.unsplash.com/photo-1608248597261-833244670d19?w=300&q=80" },
-            { id: 5, name: "Sérum Ácido Hialurónico", category: "facial", price: 20, img: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300&q=80" },
-            { id: 6, name: "Vestido Satinado Night Silk", category: "ropa", price: 25, img: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=300&q=80" }
-        ];
-
-        let cart = [];
-        let totalAmount = 0;
-
-        function renderProducts(products) {
-            const grid = document.getElementById('productsGrid');
-            grid.innerHTML = '';
-
-            products.forEach(p => {
-                grid.innerHTML += `
-                    <div class="product-card">
-                        <div class="product-img-box">
-                            <span class="badge-best">Top</span>
-                            <img src="${p.img}" alt="${p.name}" class="product-img" loading="lazy">
-                        </div>
-                        <div class="product-info">
-                            <div>
-                                <div class="product-category">${p.category}</div>
-                                <h4 class="product-title">${p.name}</h4>
-                            </div>
-                            <div>
-                                <div class="product-price">${p.price}$</div>
-                                <button class="btn-add-cart" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.img}')">
-                                    + Agregar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        // CONTROL DE MODALES
-        function openModal(id) {
-            document.getElementById(id).style.display = 'flex';
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-
-        function toggleCart() {
-            document.getElementById('cartSidebar').classList.toggle('open');
-        }
-
-        // AGENDAR CITA POR WHATSAPP (ALEATORIO)
-        function openBookingModal(serviceName, price) {
-            document.getElementById('bookingServiceInput').value = `${serviceName} (${price})`;
-            openModal('bookingModal');
-        }
-
-        function sendBookingWhatsApp(e) {
-            e.preventDefault();
-            const service = document.getElementById('bookingServiceInput').value;
-            const name = document.getElementById('bookingName').value;
-            const date = document.getElementById('bookingDate').value;
-            const time = document.getElementById('bookingTime').value;
-            const notes = document.getElementById('bookingNotes').value;
-
-            const text = `Hola SC Studio, deseo agendar una cita desde la App:\n\n` +
-                         `✨ Servicio: ${service}\n` +
-                         `👤 Cliente: ${name}\n` +
-                         `📅 Fecha: ${date}\n` +
-                         `⏰ Hora: ${time}\n` +
-                         `📝 Notas: ${notes || 'Sin notas'}`;
-
-            openWhatsApp(text);
-            closeModal('bookingModal');
-        }
-
-        // PAGAR PEDIDO POR WHATSAPP (ALEATORIO)
-        function openCheckoutModal() {
-            if (cart.length === 0) {
-                alert('Tu carrito está vacío');
-                return;
-            }
-            toggleCart();
-            openModal('checkoutModal');
-        }
-
-        function sendCheckoutWhatsApp(e) {
-            e.preventDefault();
-            const name = document.getElementById('checkoutName').value;
-            const address = document.getElementById('checkoutAddress').value;
-            const payment = document.getElementById('checkoutPayment').value;
-
-            let itemsList = '';
-            cart.forEach((item, index) => {
-                itemsList += `${index + 1}. ${item.title} - ${item.price}$\n`;
-            });
-
-            const text = `Hola SC Studio, confirmo mi pedido desde la App:\n\n` +
-                         `🛍️ PRODUCTOS:\n${itemsList}\n` +
-                         `💰 TOTAL: ${totalAmount}$\n\n` +
-                         `👤 Cliente: ${name}\n` +
-                         `📍 Dirección: ${address}\n` +
-                         `💳 Método de Pago: ${payment}`;
-
-            openWhatsApp(text);
-            cart = [];
-            updateCartUI();
-            closeModal('checkoutModal');
-        }
-
-        // GENERACIÓN DEL CUPÓN "LAS DIVAS SOMOS MÁS" + NÚMERO ALEATORIO
-        function handleLogin(e) {
-            e.preventDefault();
-            const randomDigits = Math.floor(1000 + Math.random() * 9000);
-            const fullCouponCode = `LAS DIVAS SOMOS MÁS - ${randomDigits}`;
-
-            const modalContent = document.getElementById('loginModalContent');
-            modalContent.innerHTML = `
-                <span class="close-modal" onclick="closeModal('loginModal')">&times;</span>
-                <div class="modal-header">
-                    <h3>¡Felicidades VIP!</h3>
-                    <p>Aquí tienes tu cupón exclusivo de bienvenida</p>
+            <!-- IMAGEN DE CABECERA -->
+            <div id="header-image-container" class="relative h-[25vh] min-h-[180px] w-full bg-cover bg-center shrink-0 cursor-pointer group" style="background-image: url('https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80');">
+                <div class="absolute inset-0 bg-black/20"></div>
+                
+                <div id="camera-indicator" class="absolute inset-0 bg-black/40 opacity-0 transition-opacity duration-300 flex flex-col items-center justify-center text-white gap-1 pointer-events-none">
+                    <i class="fa-solid fa-camera text-xl"></i>
+                    <span class="text-[11px] font-bold tracking-wide">Cambiar imagen</span>
                 </div>
                 
-                <div class="coupon-card">
-                    <span class="coupon-badge">DESCUENTO DEL 25%</span>
-                    <div class="coupon-title">SC STUDIO</div>
-                    <div class="coupon-code-box">
-                        <div class="coupon-code">${fullCouponCode}</div>
+                <div class="absolute top-8 left-4 z-10">
+                    <button id="btn-edit-switch" class="w-[42px] h-[42px] bg-[#f5f6f8] dark:bg-[#1c1c1e] rounded-[14px] flex items-center justify-center shadow-sm active:scale-95 transition-all duration-300">
+                        <i id="edit-icon" class="fa-solid fa-chevron-down text-black dark:text-white text-[16px]"></i>
+                    </button>
+                </div>
+                
+                <div class="absolute top-10 right-4 z-10">
+                    <div class="bg-black/60 text-white text-[13px] font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 backdrop-blur-sm">
+                        <span contenteditable="false" data-editable="true">1/1</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                     </div>
-                    <p class="coupon-instruction">📸 ¡Toma una captura de pantalla a este cupón y muéstralo al agendar tu cita!</p>
+                </div>
+            </div>
+
+            <!-- CONTENIDO DESPLAZABLE -->
+            <div class="flex-1 bg-white dark:bg-[#121212] rounded-t-[24px] -mt-5 relative z-20 flex flex-col overflow-y-auto">
+                <div class="w-full flex justify-center pt-3 pb-2 shrink-0">
+                    <div class="w-10 h-[5px] bg-gray-200 dark:bg-[#2c2c2e] rounded-full"></div>
                 </div>
 
-                <button class="btn-gold" style="width:100%; margin-top:10px;" onclick="closeModal('loginModal')">
-                    ¡Entendido, ya le tomé captura!
+                <div class="px-5 pb-4 flex flex-col gap-4">
+                    <div class="flex items-center justify-between">
+                        <div class="pr-3">
+                            <h1 id="stage1-restaurant-name" contenteditable="false" data-editable="true" class="text-[20px] font-bold text-gray-900 dark:text-white tracking-tight leading-tight">Little Caesars Pizza (Restrepo)</h1>
+                            <p contenteditable="false" data-editable="true" class="text-[14px] text-gray-500 dark:text-[#a0a0a0] mt-1 font-medium">Little Caesars Pizza Restrepo</p>
+                        </div>
+                        <button class="w-[42px] h-[42px] bg-[#f5f6f8] dark:bg-[#1c1c1e] rounded-[14px] flex items-center justify-center text-black dark:text-white transition shrink-0">
+                            <i class="fa-solid fa-phone text-[16px]"></i>
+                        </button>
+                    </div>
+
+                    <div class="bg-[#f5f6f8] dark:bg-[#1c1c1e] rounded-2xl p-4">
+                        <p contenteditable="false" data-editable="true" class="text-[14px] font-semibold text-gray-900 dark:text-white leading-tight">
+                            La tienda ha confirmado que el pedido está listo para recolectar
+                        </p>
+                    </div>
+
+                    <div class="border border-gray-200 dark:border-[#2c2c2e] rounded-3xl p-5 bg-white dark:bg-[#121212] shadow-sm">
+                        <div class="mb-4">
+                            <span id="stage1-order-title" contenteditable="false" data-editable="true" class="text-[22px] font-black text-gray-900 dark:text-white">#38 Usuario7236</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2.5 text-[14px] text-gray-800 dark:text-[#e0e0e0] mb-5">
+                            <span class="w-[18px] h-[18px] rounded-[4px] border-[1.5px] border-gray-900 dark:border-[#e0e0e0] flex items-center justify-center text-[11px] font-bold" contenteditable="false" data-editable="true">$</span>
+                            <span contenteditable="false" data-editable="true" class="font-medium">Transferencia (plataforma a tienda)</span>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        </div>
+
+                        <button id="btn-order-action" class="w-full bg-[#ff5a00] text-white font-bold py-[14px] rounded-xl text-[16px] transition active:scale-[0.98] flex justify-center items-center">
+                            <span contenteditable="false" data-editable="true" id="btn-text-node">Tengo el pedido</span>
+                        </button>
+
+                        <div class="text-center mt-5">
+                            <a href="#" class="text-[13.5px] font-medium text-gray-400 hover:text-gray-600 dark:text-[#808080] inline-flex items-center transition">
+                                <span contenteditable="false" data-editable="true">Detalles del pedido</span> 
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-0.5"><path d="m9 18 6-6-6-6"/></svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#f5f6f8] dark:bg-[#1c1c1e] rounded-2xl p-4 flex items-center justify-between cursor-pointer">
+                        <div class="flex items-center gap-3">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="text-gray-900 dark:text-white"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                            <span contenteditable="false" data-editable="true" class="text-[15px] font-bold text-gray-900 dark:text-white">Centro de ayuda</span>
+                        </div>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
+                    </div>
+
+                    <div class="bg-[#f5f6f8] dark:bg-[#1c1c1e] rounded-2xl p-4">
+                        <p contenteditable="false" data-editable="true" class="text-[13px] text-gray-500 dark:text-[#a0a0a0] font-medium mb-3">¿Te gustó el servicio de la tienda?</p>
+                        <div class="flex items-center justify-evenly pt-1 pb-1">
+                            <button class="flex items-center gap-2 text-gray-800 dark:text-white font-bold text-[14px]">
+                                <i class="fa-regular fa-thumbs-down text-[18px]"></i>
+                                <span contenteditable="false" data-editable="true">No</span>
+                            </button>
+                            <div class="h-6 w-[1px] bg-gray-300 dark:bg-[#38383a]"></div>
+                            <button class="flex items-center gap-2 text-gray-800 dark:text-white font-bold text-[14px]">
+                                <i class="fa-regular fa-thumbs-up text-[18px]"></i>
+                                <span contenteditable="false" data-editable="true">Sí</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- BARRA INFERIOR (SLIDER REDISEÑADO) -->
+            <div class="bg-white dark:bg-[#121212] px-5 pt-3 pb-6 shrink-0 z-30 shadow-[0_-10px_20px_rgba(255,255,255,1)] dark:shadow-[0_-10px_20px_rgba(18,18,18,1)] flex items-center gap-3">
+                
+                <button class="w-[50px] h-[50px] bg-transparent flex flex-col items-center justify-center gap-[6px] shrink-0 text-gray-900 dark:text-white">
+                    <div class="w-6 h-[2px] bg-current relative rounded-full">
+                        <div class="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 border-[2px] border-current bg-white dark:bg-[#121212] rounded-full"></div>
+                    </div>
+                    <div class="w-6 h-[2px] bg-current relative rounded-full">
+                        <div class="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 border-[2px] border-current bg-white dark:bg-[#121212] rounded-full"></div>
+                    </div>
                 </button>
-            `;
+                
+                <!-- Contenedor desactivado inicialmente con fondo blanco y opacidad reducida -->
+                <div id="slide-to-exit-container" class="flex-1 bg-white dark:bg-[#1c1c1e] border-[1.5px] border-gray-200 dark:border-[#2c2c2e] rounded-full h-[54px] relative overflow-hidden flex items-center select-none opacity-60 pointer-events-none transition-all duration-300">
+                    
+                    <div id="slide-fill-bar" class="absolute left-0 top-0 h-full bg-[#ff5a00] w-0 transition-all duration-75"></div>
+                    
+                    <div id="slide-text-container" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 transition-opacity duration-300">
+                        <span contenteditable="false" data-editable="true" class="text-gray-400 dark:text-[#666] font-black text-[17px] tracking-wide">Salir</span>
+                    </div>
+                    
+                    <!-- Animación de Órbita 3D (Oculta por defecto) -->
+                    <div id="loading-planets" class="didi-loader opacity-0 transition-opacity duration-200">
+                        <div class="planet"></div>
+                        <div class="planet"></div>
+                    </div>
+                    
+                    <div id="slide-thumb" class="absolute left-[3px] top-[3px] bottom-[3px] w-[46px] bg-gray-100 dark:bg-[#2c2c2e] rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing z-20 transition-all duration-75 shadow-[0_2px_5px_rgba(0,0,0,0.1)]">
+                        <!-- Ícono gris por defecto -->
+                        <svg id="slide-thumb-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a3a3a3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="translate-x-[1px] transition-colors duration-300"><path d="m13 17 5-5-5-5M6 17l5-5-5-5"/></svg>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- INTERFAZ COMPARTIDA (ETAPAS 2 y 3)         -->
+    <!-- ========================================== -->
+
+    <!-- Top Badge (Balance Flotante Persistente) -->
+    <div id="shared-top-badge" class="absolute top-12 left-1/2 -translate-x-1/2 z-[1000] bg-white dark:bg-[#1c1c1e] px-4 py-2 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_15px_rgba(0,0,0,0.5)] font-black text-lg tracking-wide text-gray-900 dark:text-white opacity-0 transition-opacity duration-500 pointer-events-none border border-gray-100 dark:border-[#2c2c2e] flex items-center justify-center gap-2">
+        <div class="bg-[#16a34a]/10 dark:bg-[#4ade80]/20 text-[#16a34a] dark:text-[#4ade80] w-6 h-6 rounded-full flex items-center justify-center text-[13px]">
+            <i class="fa-solid fa-dollar-sign"></i>
+        </div>
+        <span contenteditable="false" data-editable="true" class="text-[17px] mt-[1px]">380.000</span>
+    </div>
+
+    <!-- Botones Flotantes (FABs Persistentes) -->
+    <div id="shared-fabs" class="absolute right-4 top-[55%] -translate-y-1/2 z-[1000] flex flex-col gap-3 opacity-0 pointer-events-none translate-x-8 transition-all duration-500 ease-out">
+        <button class="w-[46px] h-[46px] bg-white dark:bg-[#1c1c1e] rounded-2xl shadow-lg flex items-center justify-center text-black dark:text-white transition active:scale-95 border border-gray-100 dark:border-[#2c2c2e]">
+            <i class="fa-solid fa-message text-[18px]"></i>
+        </button>
+        <!-- Botón Toggle (Etapa 2 <-> Etapa 3) -->
+        <button id="btn-toggle-stage" class="w-[46px] h-[46px] bg-white dark:bg-[#1c1c1e] rounded-2xl shadow-lg flex items-center justify-center text-black dark:text-white transition active:scale-95 border border-gray-100 dark:border-[#2c2c2e]">
+            <i id="icon-toggle-stage" class="fa-solid fa-list-ul text-[18px]"></i>
+        </button>
+        <button class="w-[46px] h-[46px] bg-[#ea580c] rounded-2xl shadow-[0_4px_12px_rgba(234,88,12,0.4)] flex items-center justify-center text-white transition active:scale-95 border border-[#ea580c]">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 22l10-3 10 3L12 2z"/></svg>
+        </button>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- ETAPA 2: MAPA CON RUTA DE NAVEGACIÓN       -->
+    <!-- ========================================== -->
+    <div id="stage-2" class="w-full h-screen hidden stage-transition relative overflow-hidden">
+        <div id="map-stage2" class="real-map-container"></div>
+        
+        <div id="stage2-bottom-sheet" class="bottom-sheet bg-white dark:bg-[#1c1c1e] text-gray-900 dark:text-white">
+            <div class="sheet-handle bg-gray-300 dark:bg-[#38383a]"></div>
+
+            <div class="animation-slot">
+                <div class="success-check-badge">
+                    <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                </div>
+                <div id="stage2-restaurant-logo" class="restaurant-badge-logo" style="background-image: url('https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80');"></div>
+            </div>
+
+            <div id="stage2-order-title" class="text-xl font-black text-gray-900 dark:text-white mb-0.5 text-center" contenteditable="false" data-editable="true">#38 Usuario7236</div>
+            <div id="stage2-order-date" class="text-xs text-gray-500 dark:text-[#a0a0a0] mb-3 text-center font-medium" contenteditable="false" data-editable="true">Cargando hora...</div>
+
+            <div class="text-[14px] text-gray-700 dark:text-[#e0e0e0] text-center leading-snug mb-5">
+                <span contenteditable="false" data-editable="true">Recolección exitosa</span><br>
+                Muéstrale esta página a <span id="stage2-restaurant-name" class="font-bold text-gray-900 dark:text-white" contenteditable="false" data-editable="true">Little Caesars Pizza (Restrepo)</span>
+            </div>
+
+            <button id="btn-start-delivery" class="btn-action w-full">Iniciar entrega</button>
+        </div>
+
+        <div id="stage2-nav-sheet" class="absolute bottom-0 left-0 w-full bg-white dark:bg-[#1c1c1e] rounded-t-[24px] shadow-[0_-6px_25px_rgba(0,0,0,0.15)] dark:shadow-[0_-6px_25px_rgba(0,0,0,0.6)] px-5 pb-8 pt-3 z-[500] translate-y-full transition-transform duration-500 ease-out flex flex-col">
+            <div id="stage2-expand-handle" class="stage2-expand-handle"></div>
+
+            <div class="shrink-0">
+                <h2 class="text-[28px] leading-tight font-black text-gray-900 dark:text-white mb-2 tracking-tight" contenteditable="false" data-editable="true">Cl. 18 Sur, 6</h2>
+                <p class="text-[16px] text-gray-700 dark:text-[#d0d0d0] leading-snug mb-5 font-medium" contenteditable="false" data-editable="true">Cl. 18 Sur, 6, Cl. 18 Sur #6, Bogotá,<br>Antonio Nariño</p>
+
+                <div class="bg-[#f5f6f8] dark:bg-[#2c2c2e] rounded-[22px] px-5 py-4 flex items-center justify-center mb-6">
+                    <span class="text-[14px] font-bold text-gray-800 dark:text-gray-200 text-center" contenteditable="false" data-editable="true">
+                        Recomendamos llegar antes de la(s) <span class="text-[#ea580c] font-black ml-1">17:09</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- DETALLES DEL CLIENTE: aparecen al deslizar hacia arriba -->
+            <div class="stage2-details-content">
+                <div class="stage2-detail-card mb-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <div id="stage2-customer-title" class="text-[28px] leading-tight font-black text-gray-900 dark:text-white tracking-tight" contenteditable="false" data-editable="true">#38 Usuario7236</div>
+                            <div id="stage2-customer-place" class="text-[21px] leading-tight text-gray-900 dark:text-white mt-4 font-medium" contenteditable="false" data-editable="true">discoteca terraza vip</div>
+                        </div>
+
+                        <div class="flex items-center gap-3 shrink-0">
+                            <button id="stage2-call-user" class="stage2-contact-button" aria-label="Llamar al usuario">
+                                <i class="fa-solid fa-phone text-[25px]"></i>
+                            </button>
+                            <button id="stage2-chat-user" class="stage2-contact-button" aria-label="Escribir al usuario">
+                                <i class="fa-solid fa-comment text-[24px]"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 mt-7 text-[20px] text-gray-900 dark:text-white">
+                        <span class="stage2-cash-icon">$</span>
+                        <span contenteditable="false" data-editable="true" class="font-medium">
+                            Recibe <span id="stage2-cash-amount" class="stage2-cash-value" contenteditable="false" data-editable="true">$29.797</span> del usuario
+                        </span>
+                        <span class="w-[20px] h-[20px] rounded-full border-[1.8px] border-gray-800 dark:border-gray-200 flex items-center justify-center text-[12px] font-bold shrink-0">i</span>
+                    </div>
+
+                    <button id="stage2-cash-received" class="w-full bg-[#ff5a00] text-white font-black py-[16px] rounded-[24px] text-[20px] mt-7 transition active:scale-[0.98]">
+                        Efectivo recibido
+                    </button>
+
+                    <div class="text-center mt-6">
+                        <button id="stage2-order-details" class="text-[17px] font-medium text-gray-500 dark:text-[#a0a0a0] inline-flex items-center justify-center">
+                            <span contenteditable="false" data-editable="true">Detalles del pedido</span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-1">
+                                <path d="m9 18 6-6-6-6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stage2-help-card bg-[#f0f0f4] dark:bg-[#2c2c2e] rounded-[22px] px-6 py-5 flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-4">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="text-gray-900 dark:text-white shrink-0">
+                            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                            <path d="M12 9v4"/>
+                            <path d="M12 17h.01"/>
+                        </svg>
+                        <span contenteditable="false" data-editable="true" class="text-[19px] font-bold text-gray-900 dark:text-white">Centro de ayuda</span>
+                    </div>
+                    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+                        <path d="m9 18 6-6-6-6"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ETAPA 3: MAPA GPS (ESTADÍSTICAS)           -->
+    <!-- ========================================== -->
+    <div id="stage-3" class="w-full h-screen hidden stage-transition relative overflow-hidden">
+        <div id="map-stage3" class="real-map-container"></div>
+        <div class="absolute top-12 left-4 z-[1000]">
+            <button id="btn-close-stage3" class="w-[42px] h-[42px] bg-white/90 dark:bg-[#1e293b]/90 backdrop-blur-md text-gray-900 dark:text-white rounded-[14px] flex items-center justify-center shadow-md transition active:scale-95 border border-gray-200 dark:border-slate-700/50">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+        </div>
+        <div class="bottom-sheet bg-white dark:bg-[#1c1c1e]">
+            <div class="sheet-handle bg-gray-300 dark:bg-[#38383a]"></div>
+            <div class="w-full text-center mb-4">
+                <h2 class="text-gray-900 dark:text-white font-bold text-lg tracking-wide mb-1" contenteditable="false" data-editable="true">Estadísticas de entrega</h2>
+                <p class="text-gray-500 dark:text-[#a0a0a0] text-xs font-medium" contenteditable="false" data-editable="true"><span id="stage3-completed-count" class="font-bold">7</span> pedidos completados</p>
+            </div>
+            <div class="w-full bg-[#f5f6f8] dark:bg-[#2c2c2e] rounded-2xl p-4 mb-3 grid grid-cols-2 divide-x divide-gray-300 dark:divide-[#38383a]">
+                <div class="flex flex-col items-center justify-center pr-2">
+                    <span id="stage3-orders-count" class="text-gray-900 dark:text-white font-black text-3xl mb-1" contenteditable="false" data-editable="true">3</span>
+                    <span class="text-gray-500 dark:text-[#a0a0a0] text-[11px] font-bold uppercase tracking-wide" contenteditable="false" data-editable="true">Pedido(s) en curso</span>
+                </div>
+                <div class="flex flex-col items-center justify-center pl-2">
+                    <span id="stage3-time-count" class="text-gray-900 dark:text-white font-black text-3xl mb-1" contenteditable="false" data-editable="true">36</span>
+                    <span class="text-gray-500 dark:text-[#a0a0a0] text-[11px] font-bold uppercase tracking-wide" contenteditable="false" data-editable="true">min restantes</span>
+                </div>
+            </div>
+            <!-- BANNER CREADO A PARTIR DE LA IMAGEN DE REFERENCIA -->
+            <div id="stage3-details-banner" class="w-full bg-emerald-50 dark:bg-[#0d281e] border border-emerald-200 dark:border-[#14532d] rounded-xl px-4 py-3.5 flex items-center justify-between cursor-pointer transition active:scale-[0.98]">
+                <span class="text-emerald-700 dark:text-[#4ade80] font-semibold text-[13px] truncate pr-2">
+                    Ver detalles en <span id="stage3-restaurant-name" contenteditable="false" data-editable="true">Little Caesars Pizza (Restrepo)</span>
+                </span>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <div class="w-5 h-5 rounded-full bg-[#16a34a] text-white flex items-center justify-center text-[10px]"><i class="fa-solid fa-check"></i></div>
+                    <i class="fa-solid fa-chevron-right text-emerald-600 dark:text-[#4ade80] text-[11px]"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SCRIPT GENERAL Y CONFIGURACIÓN             -->
+    <!-- ========================================== -->
+    <script>
+        const stage1 = document.getElementById('stage-1');
+        const stage2 = document.getElementById('stage-2');
+        const stage3 = document.getElementById('stage-3');
+        
+        const btnStartDelivery = document.getElementById('btn-start-delivery');
+        const btnToggleStage = document.getElementById('btn-toggle-stage');
+        const iconToggleStage = document.getElementById('icon-toggle-stage');
+        const btnCloseStage3 = document.getElementById('btn-close-stage3');
+        const btnOrderAction = document.getElementById('btn-order-action');
+        
+        const sharedTopBadge = document.getElementById('shared-top-badge');
+        const sharedFabs = document.getElementById('shared-fabs');
+
+        const stage2BottomSheet = document.getElementById('stage2-bottom-sheet');
+        const stage2NavSheet = document.getElementById('stage2-nav-sheet');
+        const stage2ExpandHandle = document.getElementById('stage2-expand-handle');
+        const stage2CustomerTitle = document.getElementById('stage2-customer-title');
+        const stage2CallUser = document.getElementById('stage2-call-user');
+        const stage2ChatUser = document.getElementById('stage2-chat-user');
+        const stage2CashReceived = document.getElementById('stage2-cash-received');
+        const stage3DetailsBanner = document.getElementById('stage3-details-banner');
+
+        // ==========================================
+        // FUNCIÓN DE SÍNTESIS DE VOZ (TEXT-TO-SPEECH)
+        // ==========================================
+        let speechEngineUnlocked = false; // Prevención para móviles
+        
+        function speakNotification(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'es-ES'; // Idioma Español
+                utterance.rate = 1.0;     // Velocidad normal
+                utterance.pitch = 1.0;    // Tono normal
+                window.speechSynthesis.speak(utterance);
+            }
         }
 
-        // LÓGICA DE CARRITO
-        function addToCart(title, price, img) {
-            cart.push({ title, price, img });
-            updateCartUI();
-            toggleCart();
+        // Panel deslizable de la Etapa 2
+        let stage2SheetDragging = false;
+        let stage2SheetStartY = 0;
+        let stage2SheetLastY = 0;
+        let stage2SheetStartedOnHandle = false;
+
+        function setStage2SheetExpanded(expanded) {
+            if (!stage2NavSheet) return;
+            stage2NavSheet.classList.toggle('stage2-sheet-expanded', expanded);
+            stage2NavSheet.dataset.expanded = expanded ? 'true' : 'false';
         }
 
-        function updateCartUI() {
-            const cartItemsContainer = document.getElementById('cartItems');
-            const cartCount = document.getElementById('cartCount');
-            const cartTotal = document.getElementById('cartTotal');
+        function startStage2SheetDrag(e) {
+            if (!stage2NavSheet || stage2NavSheet.classList.contains('slide-down-animation')) return;
+            stage2SheetDragging = true;
+            stage2SheetStartedOnHandle = !!e.target.closest('#stage2-expand-handle');
+            stage2SheetStartY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            stage2SheetLastY = stage2SheetStartY;
+            stage2NavSheet.style.transition = 'none';
+        }
 
-            cartCount.innerText = cart.length;
+        function moveStage2SheetDrag(e) {
+            if (!stage2SheetDragging) return;
+            const currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            stage2SheetLastY = currentY;
+        }
 
-            if (cart.length === 0) {
-                cartItemsContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:30px; font-size:0.85rem;">Tu carrito está vacío</p>';
-                cartTotal.innerText = '0$';
-                totalAmount = 0;
-                return;
+        function endStage2SheetDrag() {
+            if (!stage2SheetDragging) return;
+            stage2SheetDragging = false;
+            stage2NavSheet.style.transition = '';
+            const deltaY = stage2SheetLastY - stage2SheetStartY;
+
+            if (deltaY < -35) {
+                setStage2SheetExpanded(true);
+            } else if (deltaY > 35) {
+                setStage2SheetExpanded(false);
+            } else if (stage2SheetStartedOnHandle) {
+                setStage2SheetExpanded(stage2NavSheet.dataset.expanded !== 'true');
+            }
+            stage2SheetStartedOnHandle = false;
+        }
+
+        stage2NavSheet.addEventListener('touchstart', startStage2SheetDrag, {passive: true});
+        stage2NavSheet.addEventListener('mousedown', startStage2SheetDrag);
+        window.addEventListener('mousemove', moveStage2SheetDrag);
+        window.addEventListener('touchmove', moveStage2SheetDrag, {passive: true});
+        window.addEventListener('mouseup', endStage2SheetDrag);
+        window.addEventListener('touchend', endStage2SheetDrag);
+
+
+        const headerImageContainer = document.getElementById('header-image-container');
+        const stage2RestaurantLogo = document.getElementById('stage2-restaurant-logo');
+        const imageFileInput = document.getElementById('image-file-input');
+
+        let liveClockInterval;
+
+        // MAPAS GOOGLE Y CAPAS ROBUSTAS
+        const tileVoyager = 'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}';
+        const tileDarkMatter = 'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}';
+        
+        let mapStage2, mapStage3;
+        let stage2TileLayer, stage3TileLayer;
+        let stage2BgRoute, stage2MainRoute, stage3BgRoute, stage3MainRoute;
+        let markerStartStage2, markerEndStage2, markerStartStage3, markerEndStage3;
+
+        // MODO OSCURO
+        let isDarkMode = false;
+        setTimeout(() => {
+            const dmc = document.getElementById('dark-mode-container');
+            if (dmc) dmc.classList.add('opacity-0', 'pointer-events-none');
+        }, 8000);
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.documentElement.classList.toggle('dark', isDarkMode);
+            const darkModeIcon = document.getElementById('dark-mode-icon');
+            if (isDarkMode) {
+                darkModeIcon.className = 'fa-solid fa-sun text-sm text-yellow-400';
+            } else {
+                darkModeIcon.className = 'fa-solid fa-moon text-sm text-gray-800';
+            }
+            const currentTile = isDarkMode ? tileDarkMatter : tileVoyager;
+            if (stage2TileLayer) stage2TileLayer.setUrl(currentTile);
+            if (stage3TileLayer) stage3TileLayer.setUrl(currentTile);
+        }
+        document.getElementById('btn-dark-mode-toggle').addEventListener('click', toggleDarkMode);
+
+        // ==========================================
+        // GEOLOCALIZACIÓN Y RUTAS (ARREGLO DE CARGA)
+        // ==========================================
+        
+        let baseLat = 4.6100;
+        let baseLng = -74.0900;
+        let startLocation = [baseLat, baseLng];
+        let endLocation = [baseLat + 0.04, baseLng + 0.04];
+        let bogotaCenter = [baseLat + 0.02, baseLng + 0.02];
+        let realRouteCoords = [startLocation, endLocation];
+
+        // Actualiza dinámicamente todos los elementos si el mapa ya fue creado
+        function updateMapRoutes() {
+            if (stage2BgRoute) stage2BgRoute.setLatLngs(realRouteCoords);
+            if (stage2MainRoute) stage2MainRoute.setLatLngs(realRouteCoords);
+            if (stage3BgRoute) stage3BgRoute.setLatLngs(realRouteCoords);
+            if (stage3MainRoute) stage3MainRoute.setLatLngs(realRouteCoords);
+            
+            if (markerStartStage2) markerStartStage2.setLatLng(startLocation);
+            if (markerEndStage2) markerEndStage2.setLatLng(endLocation);
+            if (markerStartStage3) markerStartStage3.setLatLng(startLocation);
+            if (markerEndStage3) markerEndStage3.setLatLng(endLocation);
+        }
+
+        function generateRouteFrom(lat, lng) {
+            startLocation = [lat, lng];
+            
+            // --- MODIFICACIÓN DE LA DISTANCIA DE LA RUTA ---
+            // Genera una ruta aleatoria que está entre 1 km y 2 km de distancia
+            const distanceKm = 1 + (Math.random() * 1); 
+            // -------------------------------------------------
+            
+            const distDeg = distanceKm / 111.32; 
+            const angle = Math.random() * 2 * Math.PI;
+            const endLat = lat + distDeg * Math.cos(angle);
+            const endLng = lng + (distDeg * Math.sin(angle)) / Math.cos(lat * Math.PI / 180);
+            
+            endLocation = [endLat, endLng];
+            bogotaCenter = [(lat + endLat) / 2, (lng + endLng) / 2];
+            realRouteCoords = [startLocation, endLocation]; // Respaldo lineal
+            updateMapRoutes();
+        }
+
+        async function initLocationAndRoute() {
+            const randomLat = 4.6100 + (Math.random() * 0.1 - 0.05);
+            const randomLng = -74.0900 + (Math.random() * 0.1 - 0.05);
+            generateRouteFrom(randomLat, randomLng);
+
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        generateRouteFrom(position.coords.latitude, position.coords.longitude);
+                        await fetchStreetRoute();
+                    },
+                    async (error) => {
+                        await fetchStreetRoute();
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                await fetchStreetRoute();
+            }
+        }
+
+        async function fetchStreetRoute() {
+            try {
+                const url = `https://router.project-osrm.org/route/v1/driving/${startLocation[1]},${startLocation[0]};${endLocation[1]},${endLocation[0]}?overview=full&geometries=geojson`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.routes && data.routes.length > 0) {
+                    realRouteCoords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                    updateMapRoutes(); // Forzar actualización sin importar el momento
+                }
+            } catch (error) {
+                console.error("Fallo OSRM. Se usará línea recta.");
+            }
+        }
+
+        initLocationAndRoute();
+
+        // ==========================================
+        // ICONOS Y MAPAS REEMPLAZADOS AQUÍ
+        // ==========================================
+
+        // SVG Ícono Vehículo Azul - Etapa 2 y 3 (Basado en la imagen de referencia)
+        const iconDidiPointerHTML = `
+            <svg style="width: 100%; height: 100%;" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="sombra-marcador" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.15" />
+                    </filter>
+                </defs>
+                <path d="M 50 5 L 19.15 56.5 A 36 36 0 1 0 80.85 56.5 Z" fill="white" filter="url(#sombra-marcador)" />
+                <polygon points="50,20.5 24,65 76,65" fill="#4a7cf6" />
+                <circle cx="50" cy="75" r="28" fill="white" />
+                <circle cx="50" cy="75" r="20" fill="#4a7cf6" />
+            </svg>`;
+
+        const iconGreenUserHTML = `
+            <div style="position:relative; width:44px; height:65px; display:flex; flex-direction:column; align-items:center;">
+                <div style="width:38px; height:38px; background-color:#5ca677; border:2.5px solid white; border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:3; position:relative; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"><i class="fa-solid fa-user text-white text-[18px]"></i><div style="position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:6px solid white;"></div><div style="position:absolute; bottom:-4px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:4px solid transparent; border-right:4px solid transparent; border-top:4px solid #5ca677; z-index:4;"></div></div>
+                <div style="width:2.5px; height:18px; background-color:#111; margin-top:-2px; z-index:2;"></div>
+                <div style="width:10px; height:10px; background-color:#111; border:2px solid white; border-radius:50%; margin-top:-4px; z-index:1; box-shadow:0 2px 4px rgba(0,0,0,0.4);"></div>
+            </div>`;
+
+        function initRealMaps() {
+            if(mapStage2) return;
+            const currentTile = isDarkMode ? tileDarkMatter : tileVoyager;
+            
+            // Se actualizó el tamaño (iconSize) y el anclaje (iconAnchor) para mantener la proporción del nuevo SVG
+            const navMarkerIcon = L.divIcon({ className: 'custom-didi-pin bg-transparent border-0', html: iconDidiPointerHTML, iconSize: [38, 50], iconAnchor: [19, 25] });
+            const destMarkerIcon = L.divIcon({ className: 'custom-dest-pin', html: iconGreenUserHTML, iconSize: [44, 65], iconAnchor: [22, 60] });
+
+            // MAPA 2
+            mapStage2 = L.map('map-stage2', { center: bogotaCenter, zoom: 14, zoomControl: false });
+            stage2TileLayer = L.tileLayer(currentTile, { maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'] }).addTo(mapStage2);
+            stage2BgRoute = L.polyline(realRouteCoords, { color: '#1d2b4f', weight: 8, opacity: 1, lineJoin: 'round' }).addTo(mapStage2);
+            stage2MainRoute = L.polyline(realRouteCoords, { color: '#9aaef5', weight: 4, opacity: 1, lineJoin: 'round' }).addTo(mapStage2);
+            markerStartStage2 = L.marker(startLocation, { icon: navMarkerIcon }).addTo(mapStage2);
+            markerEndStage2 = L.marker(endLocation, { icon: destMarkerIcon }).addTo(mapStage2);
+
+            // MAPA 3
+            mapStage3 = L.map('map-stage3', { center: bogotaCenter, zoom: 14, zoomControl: false });
+            stage3TileLayer = L.tileLayer(currentTile, { maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'] }).addTo(mapStage3);
+            stage3BgRoute = L.polyline(realRouteCoords, { color: '#1d2b4f', weight: 8, opacity: 1, lineJoin: 'round' }).addTo(mapStage3);
+            stage3MainRoute = L.polyline(realRouteCoords, { color: '#9aaef5', weight: 4, opacity: 1, lineJoin: 'round' }).addTo(mapStage3);
+            markerStartStage3 = L.marker(startLocation, { icon: navMarkerIcon }).addTo(mapStage3);
+            markerEndStage3 = L.marker(endLocation, { icon: destMarkerIcon }).addTo(mapStage3);
+        }
+
+        // RELOJ
+        function startLiveClock() {
+            const dateEl = document.getElementById('stage2-order-date');
+            if (!dateEl) return;
+            function tick() {
+                if (isEditMode) return; 
+                const now = new Date();
+                const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+                let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+                const ampm = h >= 12 ? 'pm' : 'am';
+                h = h % 12 || 12; 
+                m = m < 10 ? '0'+m : m; s = s < 10 ? '0'+s : s;
+                dateEl.innerText = `${now.getDate()} de ${months[now.getMonth()]}, ${h}:${m}:${s} ${ampm}`;
+            }
+            tick(); 
+            if (liveClockInterval) clearInterval(liveClockInterval);
+            liveClockInterval = setInterval(tick, 1000);
+        }
+
+        // BOTONES INTERNOS Y ACTIVACIÓN DE LA BARRA DE SALIDA
+        btnOrderAction.addEventListener('click', () => {
+            // DESBLOQUEO DE AUDIO EN MÓVILES (Truco vital para iOS/Android)
+            if (!speechEngineUnlocked && 'speechSynthesis' in window) {
+                const silentUtterance = new SpeechSynthesisUtterance('');
+                silentUtterance.volume = 0;
+                window.speechSynthesis.speak(silentUtterance);
+                speechEngineUnlocked = true;
             }
 
-            cartItemsContainer.innerHTML = '';
-            totalAmount = 0;
+            btnOrderAction.className = 'w-full flex justify-center items-center py-2 transition-all duration-300 cursor-default';
+            btnOrderAction.innerHTML = `
+                <div class="flex items-center gap-2 text-[#48b479] dark:text-[#4ade80] font-bold text-[16px]">
+                    <i class="fa-solid fa-circle-check text-[18px]"></i>
+                    <span contenteditable="false" data-editable="true">Tengo el pedido</span>
+                </div>
+            `;
+            
+            const sliderContainer = document.getElementById('slide-to-exit-container');
+            const slideThumb = document.getElementById('slide-thumb');
+            const slideText = document.querySelector('#slide-text-container span');
+            const thumbIcon = document.getElementById('slide-thumb-icon');
+            const slideFillBar = document.getElementById('slide-fill-bar');
+            
+            sliderContainer.classList.remove('opacity-60', 'pointer-events-none', 'bg-white', 'dark:bg-[#1c1c1e]', 'border-[1.5px]', 'border-gray-200', 'dark:border-[#2c2c2e]');
+            sliderContainer.classList.add('bg-[#ff5a00]');
+            
+            slideThumb.classList.remove('bg-gray-100', 'dark:bg-[#2c2c2e]');
+            slideThumb.classList.add('bg-white');
+            
+            thumbIcon.setAttribute('stroke', '#ff5a00');
+            slideText.classList.remove('text-gray-400', 'dark:text-[#666]');
+            slideText.classList.add('text-white');
+            
+            if (slideFillBar) slideFillBar.style.display = 'none';
+        });
 
-            cart.forEach((item, index) => {
-                totalAmount += item.price;
-                cartItemsContainer.innerHTML += `
-                    <div class="cart-item">
-                        <img src="${item.img}" class="cart-item-img" alt="${item.title}">
-                        <div class="cart-item-details">
-                            <div class="cart-item-title">${item.title}</div>
-                            <div class="cart-item-price">${item.price}$</div>
-                        </div>
-                        <i class="fas fa-trash-alt" style="color:#ff0055; cursor:pointer;" onclick="removeFromCart(${index})"></i>
-                    </div>
-                `;
+        // SLIDER "SALIR" LÓGICA (Previene toques múltiples y activa Etapa 2)
+        const sliderContainer = document.getElementById('slide-to-exit-container');
+        const slideThumb = document.getElementById('slide-thumb');
+        const slideTextContainer = document.getElementById('slide-text-container');
+        const loadingPlanets = document.getElementById('loading-planets');
+        
+        let isDragging = false, startX = 0, maxDrag = 0;
+        let isSliderLoading = false;
+
+        sliderContainer.addEventListener('mousedown', startDrag);
+        sliderContainer.addEventListener('touchstart', startDrag, {passive: true});
+        window.addEventListener('mousemove', drag);
+        window.addEventListener('touchmove', drag, {passive: true});
+        window.addEventListener('mouseup', endDrag);
+        window.addEventListener('touchend', endDrag);
+
+        function startDrag(e) {
+            if (isSliderLoading) return; // Protege contra toques dobles
+            isDragging = true;
+            startX = e.type.includes('mouse') ? e.pageX : e.touches[0].pageX;
+            maxDrag = sliderContainer.offsetWidth - slideThumb.offsetWidth - 6; 
+            slideThumb.style.transition = 'none';
+        }
+
+        function drag(e) {
+            if (!isDragging || isSliderLoading) return;
+            let moveX = (e.type.includes('mouse') ? e.pageX : e.touches[0].pageX) - startX;
+            if (moveX < 0) moveX = 0;
+            if (moveX > maxDrag) moveX = maxDrag;
+            slideThumb.style.transform = `translateX(${moveX}px)`;
+        }
+
+        function endDrag(e) {
+            if (!isDragging || isSliderLoading) return;
+            isDragging = false;
+            slideThumb.style.transition = 'transform 0.3s ease';
+            let moveX = (e.type.includes('mouse') ? e.pageX : e.changedTouches[0].pageX) - startX;
+
+            if (moveX > maxDrag * 0.8) {
+                isSliderLoading = true; // Bloquear completamente el slider
+                sliderContainer.style.pointerEvents = 'none';
+                slideThumb.style.transform = `translateX(${maxDrag}px)`;
+                
+                slideTextContainer.style.opacity = '0';
+                slideThumb.style.opacity = '0';
+                loadingPlanets.classList.remove('opacity-0');
+                
+                setTimeout(() => {
+                    const rName = document.getElementById('stage1-restaurant-name');
+                    const oTitle = document.getElementById('stage1-order-title');
+                    
+                    if (rName) {
+                        const s2Name = document.getElementById('stage2-restaurant-name');
+                        if (s2Name) s2Name.innerText = rName.innerText;
+                        
+                        const s3Name = document.getElementById('stage3-restaurant-name');
+                        if (s3Name) s3Name.innerText = rName.innerText;
+                    }
+                    
+                    if (oTitle) {
+                        const s2Title = document.getElementById('stage2-order-title');
+                        if (s2Title) s2Title.innerText = oTitle.innerText;
+
+                        if (stage2CustomerTitle) stage2CustomerTitle.innerText = oTitle.innerText;
+                    }
+
+                    setStage2SheetExpanded(false);
+                    stage2NavSheet.style.transition = '';
+                    stage1.classList.add('hidden');
+                    stage2.classList.remove('hidden');
+                    
+                    // Inicializar mapa DESPUÉS de quitar 'hidden' para cálculo exacto de Leaflet
+                    initRealMaps();
+                    
+                    // ==========================================
+                    // REPRODUCCIÓN DE VOZ SINTÉTICA (Segura)
+                    // ==========================================
+                    speakNotification("Recibiste un nuevo pedido, mantente en una zona segura para ver los detalles.");
+                    
+                    if(sharedTopBadge) sharedTopBadge.classList.remove('opacity-0', 'pointer-events-none');
+                    if(sharedFabs) sharedFabs.classList.remove('opacity-0', 'pointer-events-none', 'translate-x-8');
+
+                    // Reinicio visual oculto del slider por si se regresa de otra manera
+                    setTimeout(() => {
+                        slideThumb.style.transform = `translateX(0px)`;
+                        slideTextContainer.style.opacity = '1';
+                        slideThumb.style.opacity = '1';
+                        loadingPlanets.classList.add('opacity-0');
+                        isSliderLoading = false;
+                        sliderContainer.style.pointerEvents = 'auto';
+                    }, 500);
+
+                    startLiveClock(); 
+                    
+                    // Ajuste seguro de Bounds para el mapa
+                    setTimeout(() => {
+                        try {
+                            mapStage2.invalidateSize();
+                            if(stage2MainRoute) mapStage2.fitBounds(stage2MainRoute.getBounds(), { paddingTopLeft: [50, 50], paddingBottomRight: [50, 320] });
+                        } catch(err){}
+                    }, 400);
+                }, 1500); 
+            } else {
+                slideThumb.style.transform = `translateX(0px)`;
+            }
+        }
+
+        btnStartDelivery.addEventListener('click', () => {
+            if (stage2BottomSheet) stage2BottomSheet.classList.add('slide-down-animation');
+            if (stage2NavSheet) stage2NavSheet.classList.remove('translate-y-full');
+            if (mapStage2) {
+                setTimeout(() => {
+                    try {
+                        mapStage2.invalidateSize();
+                        if(stage2MainRoute) mapStage2.fitBounds(stage2MainRoute.getBounds(), { paddingTopLeft: [80, 80], paddingBottomRight: [80, 220], animate: true, duration: 1.0 });
+                    } catch(err){}
+                }, 300);
+            }
+        });
+
+        if (stage2CallUser) {
+            stage2CallUser.addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.location.href = 'tel:';
+            });
+        }
+
+        if (stage2ChatUser) {
+            stage2ChatUser.addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.location.href = 'sms:';
+            });
+        }
+
+        if (stage2CashReceived) {
+            stage2CashReceived.addEventListener('click', (e) => {
+                e.stopPropagation();
+                stage2CashReceived.innerHTML = '<i class="fa-solid fa-circle-check mr-2"></i>Efectivo recibido';
+                stage2CashReceived.classList.remove('bg-[#ff5a00]');
+                stage2CashReceived.classList.add('bg-[#ea580c]');
+            });
+        }
+
+        let isStage3Active = false;
+        btnToggleStage.addEventListener('click', () => {
+            if (!isStage3Active) {
+                stage2.classList.add('hidden');
+                stage3.classList.remove('hidden');
+                iconToggleStage.className = 'fa-solid fa-map-location-dot text-[18px]'; 
+                isStage3Active = true;
+                setTimeout(() => {
+                    try {
+                        mapStage3.invalidateSize();
+                        if(stage3MainRoute) mapStage3.fitBounds(stage3MainRoute.getBounds(), { padding: [100, 100] });
+                    } catch(e){}
+                }, 400);
+            } else {
+                stage3.classList.add('hidden');
+                stage2.classList.remove('hidden');
+                iconToggleStage.className = 'fa-solid fa-list-ul text-[18px]';
+                isStage3Active = false;
+                setTimeout(() => {
+                    mapStage2.invalidateSize();
+                }, 400);
+            }
+        });
+
+        btnCloseStage3.addEventListener('click', () => {
+            stage3.classList.add('hidden');
+            stage2.classList.remove('hidden');
+            iconToggleStage.className = 'fa-solid fa-list-ul text-[18px]';
+            isStage3Active = false;
+            setTimeout(() => {
+                mapStage2.invalidateSize();
+            }, 400);
+        });
+
+        // RETORNO AL PULSAR EL BANNER DE ETAPA 3
+        if (stage3DetailsBanner) {
+            stage3DetailsBanner.addEventListener('click', () => {
+                stage3.classList.add('hidden');
+                stage2.classList.remove('hidden');
+                
+                iconToggleStage.className = 'fa-solid fa-list-ul text-[18px]';
+                isStage3Active = false;
+                
+                if (stage2BottomSheet) {
+                    stage2BottomSheet.classList.remove('slide-down-animation');
+                }
+                
+                if (stage2NavSheet) {
+                    stage2NavSheet.classList.add('translate-y-full'); 
+                    setStage2SheetExpanded(false); 
+                }
+                
+                setTimeout(() => {
+                    try {
+                        mapStage2.invalidateSize();
+                        if(stage2MainRoute) mapStage2.fitBounds(stage2MainRoute.getBounds(), { paddingTopLeft: [50, 50], paddingBottomRight: [50, 320] });
+                    } catch(e){}
+                }, 400);
+            });
+        }
+
+        // EDICIÓN DE TEXTO E IMÁGENES
+        let isEditMode = false;
+        const btnEditSwitch = document.getElementById('btn-edit-switch');
+        const editIcon = document.getElementById('edit-icon');
+        const cameraIndicator = document.getElementById('camera-indicator');
+        
+        btnEditSwitch.addEventListener('click', () => {
+            isEditMode = !isEditMode;
+            document.body.classList.toggle('edit-mode', isEditMode);
+            
+            document.querySelectorAll('[data-editable="true"]').forEach(el => {
+                el.setAttribute('contenteditable', isEditMode ? 'true' : 'false');
             });
 
-            cartTotal.innerText = totalAmount + '$';
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCartUI();
-        }
-
-        function filterProducts(category, event) {
-            const tabs = document.querySelectorAll('.tab-btn');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-
-            if (category === 'all') {
-                renderProducts(productsData);
+            if (isEditMode) {
+                editIcon.className = 'fa-solid fa-chevron-left text-black dark:text-white text-[16px]';
+                btnEditSwitch.classList.add('opacity-80', 'bg-orange-100');
+                cameraIndicator.classList.remove('opacity-0');
+                cameraIndicator.classList.add('opacity-100');
             } else {
-                const filtered = productsData.filter(p => p.category === category);
-                renderProducts(filtered);
+                editIcon.className = 'fa-solid fa-chevron-down text-black dark:text-white text-[16px]';
+                btnEditSwitch.classList.remove('opacity-80', 'bg-orange-100');
+                cameraIndicator.classList.remove('opacity-100');
+                cameraIndicator.classList.add('opacity-0');
+                window.getSelection().removeAllRanges(); 
             }
-        }
+        });
 
-        document.addEventListener("DOMContentLoaded", () => {
-            renderProducts(productsData);
+        headerImageContainer.addEventListener('click', (e) => {
+            if (e.target.closest('button')) return;
+            if (isEditMode) {
+                imageFileInput.click();
+            }
+        });
+
+        imageFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const imageUrl = event.target.result;
+                    headerImageContainer.style.backgroundImage = `url('${imageUrl}')`;
+                    if (stage2RestaurantLogo) stage2RestaurantLogo.style.backgroundImage = `url('${imageUrl}')`;
+                };
+                reader.readAsDataURL(file);
+            }
+            e.target.value = ''; 
         });
     </script>
 </body>
